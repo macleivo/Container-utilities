@@ -42,6 +42,13 @@ TEST_CASE( "test_enumerate()", "container utils" ) {
             ++e;
         }
     }
+    {
+        auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto&& [i, e] : mleivo::cu::enumerate(std::move(test))) {
+            REQUIRE(e == 'a' + i);
+            ++e;
+        }
+    }
 }
 
 TEST_CASE( "test_remove_all()" , "[container utils]" ) {
