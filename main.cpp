@@ -715,6 +715,13 @@ void test_pipe_sort() {
     }
 }
 
+void test_pipe_max_element() {
+    std::cout << "\n";
+    auto x = VerboseIntVector({0, 1, 2, 3});
+    auto v = x | mleivo::pipes::max_element();
+    COMPARE(*v, 3);
+}
+
 int main() {
     test_merge();
     test_filter();
@@ -736,5 +743,6 @@ int main() {
     test_pipe_for_each();
     test_pipe_for_each_verbose();
     test_pipe_sort();
+    test_pipe_max_element();
     return g_ret_val;
 }
