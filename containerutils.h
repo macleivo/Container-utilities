@@ -19,6 +19,7 @@
 #include "type_traits.h"
 
 #include <algorithm>
+#include <cassert>
 #include <vector>
 
 namespace mleivo::cu
@@ -43,6 +44,66 @@ bool any_of(const ContainerT& container, UnaryPredicate&& predicate)
     using std::begin;
     using std::end;
     return std::any_of(begin(container), end(container), predicate);
+}
+
+// static_cast_all
+template<typename T, typename ValueT, template<typename> typename ContainerT>
+auto static_cast_all(ContainerT<ValueT>& container)
+{
+    using std::begin;
+    using std::end;
+    using std::back_inserter;
+    auto out = ContainerT<T>{};
+    if constexpr(mleivo::type_traits::has_method_push_back_v<decltype(container)>)
+    {
+        std::transform(begin(container), end(container), back_inserter(out), [](auto item) {
+            return static_cast<T>(item);
+        });
+    }
+    else
+    {
+        static_assert(mleivo::type_traits::always_false_v<T>, "The container must have a method called push_back!");
+    }
+    return out;
+}
+
+template<typename OutT, typename InT, size_t N>
+auto static_cast_all(InT (&container)[N])
+{
+    using std::begin;
+    using std::end;
+    using std::back_inserter;
+    std::array<OutT, N> out = {};
+    std::transform(begin(container), end(container), begin(out), [](auto item) {
+        return static_cast<OutT>(item);
+    });
+    return out;
+}
+
+template<typename T, typename FromT, size_t N, template<typename, size_t> typename ContainerT>
+auto static_cast_all(ContainerT<FromT, N>& container)
+{
+    using std::begin;
+    using std::end;
+    using std::back_inserter;
+    ContainerT<T, N> out = {};
+    std::transform(begin(container), end(container), begin(out), [](auto item) {
+        return static_cast<T>(item);
+    });
+    return out;
+}
+
+template<typename T, typename ContainerT> // fall back to returning an std::vector
+auto static_cast_all(ContainerT& container)
+{
+    using std::begin;
+    using std::end;
+    using std::back_inserter;
+    auto out = std::vector<T>{};
+    std::transform(begin(container), end(container), back_inserter(out), [](auto item) {
+        return static_cast<T>(item);
+    });
+    return out;
 }
 
 // contains
@@ -106,6 +167,51 @@ merge(ContainerT1&& c1, ContainerT2ToN&&... c2ToN)
     return out;
 }
 
+// move_to_index
+template<typename ContainerT>
+void move_to_index(ContainerT& container,
+                   typename std::decay_t<ContainerT>::difference_type oldIndex,
+                   typename std::decay_t<ContainerT>::difference_type newIndex)
+{
+    using std::begin;
+    using std::rend;
+    if (oldIndex > newIndex)
+    {
+        std::rotate(rend(container) - oldIndex - 1, rend(container) - oldIndex, rend(container) - newIndex);
+        return;
+    }
+
+    std::rotate(begin(container) + oldIndex, begin(container) + oldIndex + 1, begin(container) + newIndex + 1);
+}
+
+// index_of
+template<typename ContainerT>
+auto index_of(const ContainerT& container, const value_type<ContainerT>& itemToFind)
+{
+    using std::cbegin;
+    using std::cend;
+    return std::distance(cbegin(container), std::find(cbegin(container), cend(container), itemToFind));
+}
+
+// pop_front
+template<typename ContainerT>
+void pop_front(ContainerT& v)
+{
+    using std::begin;
+    assert(!v.empty());
+    v.erase(begin(v));
+}
+
+// remove_all
+template<typename ContainerT, typename T>
+void remove_all(ContainerT& container, T&& itemToFind)
+{
+    using std::begin;
+    using std::end;
+    container.erase(std::remove(begin(container), end(container), std::forward<T>(itemToFind)), end(container));
+}
+
+// remove_duplicates
 template<typename ContainerT, typename EqualityCmp>
 void remove_duplicates(ContainerT& container, const EqualityCmp& cmp)
 {

@@ -67,6 +67,7 @@ using value_type = typename std::decay_t<ContainerT>::value_type;
 
 CONTAINER_UTILS_HAS_METHOD(contains, bool, std::declval<value_type<ContainerT>>())
 CONTAINER_UTILS_HAS_METHOD(count, size_t, std::declval<value_type<ContainerT>>())
+CONTAINER_UTILS_HAS_METHOD(push_back, void, std::declval<value_type<ContainerT>>())
 
 #undef GLUE_HELPER
 #undef GLUE
