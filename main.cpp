@@ -1,5 +1,6 @@
 /*
  * Copyright 2022 Marcus Leivo
+ * Copyright 2023 Marcus Leivo
  *
  * This program is free software: you can redistribute it and/or modify it
  * under the terms of the GNU Affero General Public License as published by
@@ -18,6 +19,7 @@
 
 #include "containerutils.h"
 #include "pipes.h"
+#include "propagate_const.h"
 
 #include <iostream>
 
@@ -726,6 +728,18 @@ void test_pipe_accumulate() {
     auto v = std::vector<int>{0, 1, 2, 3};
     auto ans = v | mleivo::pipes::accumulate(0, std::plus<int>{});
     COMPARE(ans, 6);
+}
+
+void test_pc() {
+    struct S {
+        void f(){};
+        void g() const {};
+    };
+    mleivo::pc<S*> i = new S;
+    auto& j = *i;
+    j.f();
+    j.g();
+    decltype(auto) x = i.get();
 }
 
 int main() {
