@@ -117,4 +117,114 @@ public:
         return get() != nullptr;
     }
 };
+
+template <typename T>
+constexpr bool operator==(const propagate_const<T>& pt, std::nullptr_t) {
+    return pt.get() == nullptr;
+}
+
+template <typename T>
+constexpr bool operator==(std::nullptr_t, const propagate_const<T>& pt) {
+    return nullptr == pt.get();
+}
+
+template <typename T>
+constexpr bool operator!=(const propagate_const<T>& pt, std::nullptr_t) {
+    return pt.get() != nullptr;
+}
+
+template <typename T>
+constexpr bool operator!=(std::nullptr_t, const propagate_const<T>& pt) {
+    return nullptr != pt.get();
+}
+
+template <typename T, typename U>
+constexpr bool operator==(const propagate_const<T>& pt, const propagate_const<U>& pu) {
+    return pt.get() == pu.get();
+}
+
+template <typename T, typename U>
+constexpr bool operator!=(const propagate_const<T>& pt, const propagate_const<U>& pu) {
+    return pt.get() != pu.get();
+}
+
+template <typename T, typename U>
+constexpr bool operator<(const propagate_const<T>& pt, const propagate_const<U>& pu) {
+    return pt.get() < pu.get();
+}
+
+template <typename T, typename U>
+constexpr bool operator>(const propagate_const<T>& pt, const propagate_const<U>& pu) {
+    return pt.get() > pu.get();
+}
+
+template <typename T, typename U>
+constexpr bool operator<=(const propagate_const<T>& pt, const propagate_const<U>& pu) {
+    return pt.get() <= pu.get();
+}
+
+template <typename T, typename U>
+constexpr bool operator>=(const propagate_const<T>& pt, const propagate_const<U>& pu) {
+    return pt.get() >= pu.get();
+}
+
+template <typename T, typename U>
+constexpr bool operator==(const propagate_const<T>& pt, const U& u) {
+    return pt.get() == u;
+}
+
+template <typename T, typename U>
+constexpr bool operator!=(const propagate_const<T>& pt, const U& u) {
+    return pt.get() != u;
+}
+
+template <typename T, typename U>
+constexpr bool operator==(const T& t, const propagate_const<U>& pu) {
+    return t == pu.get();
+}
+
+template <typename T, typename U>
+constexpr bool operator!=(const T& t, const propagate_const<U>& pu) {
+    return t != pu.get();
+}
+
+template <typename T, typename U>
+constexpr bool operator<(const propagate_const<T>& pt, const U& u) {
+    return pt.get() < u;
+}
+
+template <typename T, typename U>
+constexpr bool operator>(const propagate_const<T>& pt, const U& u) {
+    return pt.get() > u;
+}
+
+template <typename T, typename U>
+constexpr bool operator<=(const propagate_const<T>& pt, const U& u) {
+    return pt.get() <= u;
+}
+
+template <typename T, typename U>
+constexpr bool operator>=(const propagate_const<T>& pt, const U& u) {
+    return pt.get() >= u;
+}
+
+template <typename T, typename U>
+constexpr bool operator<(const T& t, const propagate_const<U>& pu) {
+    return t < pu.get();
+}
+
+template <typename T, typename U>
+constexpr bool operator>(const T& t, const propagate_const<U>& pu) {
+    return t > pu.get();
+}
+
+template <typename T, typename U>
+constexpr bool operator<=(const T& t, const propagate_const<U>& pu) {
+    return t <= pu.get();
+}
+
+template <typename T, typename U>
+constexpr bool operator>=(const T& t, const propagate_const<U>& pu) {
+    return t >= pu.get();
+}
 } // namespace mleivo
