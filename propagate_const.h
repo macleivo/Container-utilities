@@ -117,114 +117,139 @@ public:
         return get() != nullptr;
     }
 };
+} // namespace mleivo
 
 template <typename T>
-constexpr bool operator==(const propagate_const<T>& pt, std::nullptr_t) {
+constexpr bool operator==(const mleivo::propagate_const<T>& pt, std::nullptr_t) {
     return pt.get() == nullptr;
 }
 
 template <typename T>
-constexpr bool operator==(std::nullptr_t, const propagate_const<T>& pt) {
+constexpr bool operator==(std::nullptr_t, const mleivo::propagate_const<T>& pt) {
     return nullptr == pt.get();
 }
 
 template <typename T>
-constexpr bool operator!=(const propagate_const<T>& pt, std::nullptr_t) {
+constexpr bool operator!=(const mleivo::propagate_const<T>& pt, std::nullptr_t) {
     return pt.get() != nullptr;
 }
 
 template <typename T>
-constexpr bool operator!=(std::nullptr_t, const propagate_const<T>& pt) {
+constexpr bool operator!=(std::nullptr_t, const mleivo::propagate_const<T>& pt) {
     return nullptr != pt.get();
 }
 
 template <typename T, typename U>
-constexpr bool operator==(const propagate_const<T>& pt, const propagate_const<U>& pu) {
+constexpr bool operator==(const mleivo::propagate_const<T>& pt, const mleivo::propagate_const<U>& pu) {
     return pt.get() == pu.get();
 }
 
 template <typename T, typename U>
-constexpr bool operator!=(const propagate_const<T>& pt, const propagate_const<U>& pu) {
+constexpr bool operator!=(const mleivo::propagate_const<T>& pt, const mleivo::propagate_const<U>& pu) {
     return pt.get() != pu.get();
 }
 
 template <typename T, typename U>
-constexpr bool operator<(const propagate_const<T>& pt, const propagate_const<U>& pu) {
+constexpr bool operator<(const mleivo::propagate_const<T>& pt, const mleivo::propagate_const<U>& pu) {
     return pt.get() < pu.get();
 }
 
 template <typename T, typename U>
-constexpr bool operator>(const propagate_const<T>& pt, const propagate_const<U>& pu) {
+constexpr bool operator>(const mleivo::propagate_const<T>& pt, const mleivo::propagate_const<U>& pu) {
     return pt.get() > pu.get();
 }
 
 template <typename T, typename U>
-constexpr bool operator<=(const propagate_const<T>& pt, const propagate_const<U>& pu) {
+constexpr bool operator<=(const mleivo::propagate_const<T>& pt, const mleivo::propagate_const<U>& pu) {
     return pt.get() <= pu.get();
 }
 
 template <typename T, typename U>
-constexpr bool operator>=(const propagate_const<T>& pt, const propagate_const<U>& pu) {
+constexpr bool operator>=(const mleivo::propagate_const<T>& pt, const mleivo::propagate_const<U>& pu) {
     return pt.get() >= pu.get();
 }
 
 template <typename T, typename U>
-constexpr bool operator==(const propagate_const<T>& pt, const U& u) {
+constexpr bool operator==(const mleivo::propagate_const<T>& pt, const U& u) {
     return pt.get() == u;
 }
 
 template <typename T, typename U>
-constexpr bool operator!=(const propagate_const<T>& pt, const U& u) {
+constexpr bool operator!=(const mleivo::propagate_const<T>& pt, const U& u) {
     return pt.get() != u;
 }
 
 template <typename T, typename U>
-constexpr bool operator==(const T& t, const propagate_const<U>& pu) {
+constexpr bool operator==(const T& t, const mleivo::propagate_const<U>& pu) {
     return t == pu.get();
 }
 
 template <typename T, typename U>
-constexpr bool operator!=(const T& t, const propagate_const<U>& pu) {
+constexpr bool operator!=(const T& t, const mleivo::propagate_const<U>& pu) {
     return t != pu.get();
 }
 
 template <typename T, typename U>
-constexpr bool operator<(const propagate_const<T>& pt, const U& u) {
+constexpr bool operator<(const mleivo::propagate_const<T>& pt, const U& u) {
     return pt.get() < u;
 }
 
 template <typename T, typename U>
-constexpr bool operator>(const propagate_const<T>& pt, const U& u) {
+constexpr bool operator>(const mleivo::propagate_const<T>& pt, const U& u) {
     return pt.get() > u;
 }
 
 template <typename T, typename U>
-constexpr bool operator<=(const propagate_const<T>& pt, const U& u) {
+constexpr bool operator<=(const mleivo::propagate_const<T>& pt, const U& u) {
     return pt.get() <= u;
 }
 
 template <typename T, typename U>
-constexpr bool operator>=(const propagate_const<T>& pt, const U& u) {
+constexpr bool operator>=(const mleivo::propagate_const<T>& pt, const U& u) {
     return pt.get() >= u;
 }
 
 template <typename T, typename U>
-constexpr bool operator<(const T& t, const propagate_const<U>& pu) {
+constexpr bool operator<(const T& t, const mleivo::propagate_const<U>& pu) {
     return t < pu.get();
 }
 
 template <typename T, typename U>
-constexpr bool operator>(const T& t, const propagate_const<U>& pu) {
+constexpr bool operator>(const T& t, const mleivo::propagate_const<U>& pu) {
     return t > pu.get();
 }
 
 template <typename T, typename U>
-constexpr bool operator<=(const T& t, const propagate_const<U>& pu) {
+constexpr bool operator<=(const T& t, const mleivo::propagate_const<U>& pu) {
     return t <= pu.get();
 }
 
 template <typename T, typename U>
-constexpr bool operator>=(const T& t, const propagate_const<U>& pu) {
+constexpr bool operator>=(const T& t, const mleivo::propagate_const<U>& pu) {
     return t >= pu.get();
 }
-} // namespace mleivo
+
+template<typename U, bool = std::is_swappable_v<U>>
+void swap(mleivo::propagate_const<U>&& lhs, mleivo::propagate_const<U>&& rhs) noexcept(noexcept(lhs.swap(rhs)))
+{
+    lhs.swap(rhs);
+}
+
+template<typename T>
+constexpr T& get_underlying(mleivo::propagate_const<T>& pt) noexcept {
+    return pt.get();
+}
+#include <memory>
+template<typename T>
+constexpr const T& get_underlying(const mleivo::propagate_const<T>& pt) noexcept {
+    std::hash<std::unique_ptr<int>> s;
+    return pt.get();
+}
+
+template<typename T>
+struct std::hash<mleivo::propagate_const<T>> {
+    std::size_t operator()(const mleivo::propagate_const<T>& pt) noexcept(
+        noexcept(std::declval<std::hash<T>>()(std::declval<std::hash<T>>()))) {
+        return std::hash<T>{}(pt.get());
+    }
+};
