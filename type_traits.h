@@ -27,27 +27,25 @@ inline constexpr bool always_false_v = false;
 template<typename ContainerT>
 using value_type = typename std::decay_t<ContainerT>::value_type;
 
-#define RETURN_TYPE(METHOD_NAME, ARGS...) decltype(std::declval<std::decay_t<ContainerT>>().METHOD_NAME(ARGS))
-#define CONTAINER_UTILS_HAS_METHOD(METHOD_NAME, WANTED_RETURN_TYPE, ARGS...) \
+#define MLEIVO_RETURN_TYPE(METHOD_NAME, ARGS...) decltype(std::declval<std::decay_t<ContainerT>>().METHOD_NAME(ARGS))
+#define MLEIVO_HAS_METHOD(METHOD_NAME, WANTED_RETURN_TYPE, ARGS...) \
     template<typename ContainerT, typename = void> \
     struct has_method_ ## METHOD_NAME : std::false_type \
     { \
     }; \
 \
     template<typename ContainerT> \
-    struct has_method_ ## METHOD_NAME<ContainerT, std::void_t<RETURN_TYPE(METHOD_NAME, ARGS)>> \
-        : std::bool_constant<std::is_same_v<WANTED_RETURN_TYPE, RETURN_TYPE(METHOD_NAME, ARGS)>> \
+    struct has_method_ ## METHOD_NAME<ContainerT, std::void_t<MLEIVO_RETURN_TYPE(METHOD_NAME, ARGS)>> \
+        : std::bool_constant<std::is_same_v<WANTED_RETURN_TYPE, MLEIVO_RETURN_TYPE(METHOD_NAME, ARGS)>> \
     { \
     }; \
 \
     template<typename ContainerT> \
     inline constexpr bool has_method_ ## METHOD_NAME ## _v = has_method_ ## METHOD_NAME<ContainerT>::value;
 
-CONTAINER_UTILS_HAS_METHOD(contains, bool, std::declval<value_type<ContainerT>>())
-CONTAINER_UTILS_HAS_METHOD(count, size_t, std::declval<value_type<ContainerT>>())
-CONTAINER_UTILS_HAS_METHOD(push_back, void, std::declval<value_type<ContainerT>>())
-#undef RETURN_TYPE
-#undef CONTAINER_UTILS_HAS_METHOD
+MLEIVO_HAS_METHOD(contains, bool, std::declval<value_type<ContainerT>>())
+MLEIVO_HAS_METHOD(count, size_t, std::declval<value_type<ContainerT>>())
+MLEIVO_HAS_METHOD(push_back, void, std::declval<value_type<ContainerT>>())
 
 // is_predicate
 template<typename Pred, typename... Args>
