@@ -37,6 +37,7 @@ bool all_of(const ContainerT& container, UnaryPredicate&& predicate)
     using std::end;
     return std::all_of(begin(container), end(container), predicate);
 }
+
 // any_of
 template<typename ContainerT, typename UnaryPredicate>
 bool any_of(const ContainerT& container, UnaryPredicate&& predicate)
@@ -47,63 +48,44 @@ bool any_of(const ContainerT& container, UnaryPredicate&& predicate)
 }
 
 // static_cast_all
-template<typename T, typename ValueT, template<typename> typename ContainerT>
-auto static_cast_all(ContainerT<ValueT>& container)
+template<typename T, typename ValueT, template<typename...> typename ContainerT, typename... ContainerTArgs>
+auto static_cast_all(const ContainerT<ValueT, ContainerTArgs...>& container)
 {
+    using std::back_inserter;
     using std::begin;
     using std::end;
-    using std::back_inserter;
-    auto out = ContainerT<T>{};
-    if constexpr(mleivo::type_traits::has_method_push_back_v<decltype(container)>)
-    {
-        std::transform(begin(container), end(container), back_inserter(out), [](auto item) {
-            return static_cast<T>(item);
-        });
-    }
-    else
-    {
-        static_assert(mleivo::type_traits::always_false_v<T>, "The container must have a method called push_back!");
-    }
-    return out;
+    return ContainerT<T>(begin(container), end(container));
 }
 
 template<typename OutT, typename InT, size_t N>
-auto static_cast_all(InT (&container)[N])
+auto static_cast_all(const InT (&container)[N])
 {
+    using std::back_inserter;
     using std::begin;
     using std::end;
-    using std::back_inserter;
-    std::array<OutT, N> out = {};
-    std::transform(begin(container), end(container), begin(out), [](auto item) {
-        return static_cast<OutT>(item);
-    });
+    auto out = std::array<OutT, N>();
+    std::copy(begin(container), end(container), begin(out));
     return out;
 }
 
 template<typename T, typename FromT, size_t N, template<typename, size_t> typename ContainerT>
-auto static_cast_all(ContainerT<FromT, N>& container)
+auto static_cast_all(const ContainerT<FromT, N>& container)
 {
+    using std::back_inserter;
     using std::begin;
     using std::end;
-    using std::back_inserter;
-    ContainerT<T, N> out = {};
-    std::transform(begin(container), end(container), begin(out), [](auto item) {
-        return static_cast<T>(item);
-    });
+    auto out = ContainerT<T, N>();
+    std::copy(begin(container), end(container), begin(out));
     return out;
 }
 
 template<typename T, typename ContainerT> // fall back to returning an std::vector
-auto static_cast_all(ContainerT& container)
+auto static_cast_all(const ContainerT& container)
 {
+    using std::back_inserter;
     using std::begin;
     using std::end;
-    using std::back_inserter;
-    auto out = std::vector<T>{};
-    std::transform(begin(container), end(container), back_inserter(out), [](auto item) {
-        return static_cast<T>(item);
-    });
-    return out;
+    return std::vector<T>(begin(container), end(container));
 }
 
 // contains
@@ -149,7 +131,8 @@ std::vector<value_type<ContainerT>> merge(ContainerT&& c)
 }
 
 template<typename ContainerT1, typename... ContainerT2ToN>
-std::enable_if_t<mleivo::type_traits::value_types_equal_v<ContainerT1, ContainerT2ToN...>, std::vector<value_type<ContainerT1>>>
+std::enable_if_t<mleivo::type_traits::value_types_equal_v<ContainerT1, ContainerT2ToN...>,
+                 std::vector<value_type<ContainerT1>>>
 merge(ContainerT1&& c1, ContainerT2ToN&&... c2ToN)
 {
     auto out = merge(std::forward<ContainerT1>(c1));
@@ -169,8 +152,7 @@ merge(ContainerT1&& c1, ContainerT2ToN&&... c2ToN)
 
 // move_to_index
 template<typename ContainerT>
-void move_to_index(ContainerT& container,
-                   typename std::decay_t<ContainerT>::difference_type oldIndex,
+void move_to_index(ContainerT& container, typename std::decay_t<ContainerT>::difference_type oldIndex,
                    typename std::decay_t<ContainerT>::difference_type newIndex)
 {
     using std::begin;
@@ -212,7 +194,7 @@ void remove_all(ContainerT& container, T&& predOrItem)
 {
     using std::begin;
     using std::end;
-    if constexpr(mleivo::type_traits::is_unary_predicate_v<decltype(predOrItem), value_type<ContainerT>>)
+    if constexpr (mleivo::type_traits::is_unary_predicate_v<decltype(predOrItem), value_type<ContainerT>>)
         container.erase(std::remove_if(begin(container), end(container), std::forward<T>(predOrItem)), end(container));
     else
         container.erase(std::remove(begin(container), end(container), std::forward<T>(predOrItem)), end(container));
@@ -241,7 +223,7 @@ void remove_duplicates(ContainerT& container, const EqualityCmp& cmp)
 template<typename ContainerT>
 void remove_duplicates(ContainerT& container)
 {
-    remove_duplicates(container, std::equal_to{});
+    remove_duplicates(container, std::equal_to {});
 }
 
 template<typename ContainerT>
@@ -275,16 +257,13 @@ template<typename ContainerT, typename TransformerT>
 auto transform(ContainerT&& c, TransformerT&& t)
 {
     using t_ret_val = decltype(std::declval<TransformerT>()(std::declval<value_type<ContainerT>>()));
-    std::conditional_t<std::is_same_v<value_type<ContainerT>, t_ret_val>,
-                       std::decay_t<ContainerT>,
+    std::conditional_t<std::is_same_v<value_type<ContainerT>, t_ret_val>, std::decay_t<ContainerT>,
                        std::vector<t_ret_val>>
-      out;
+            out;
     if constexpr (std::is_rvalue_reference_v<decltype(c)> && std::is_move_constructible_v<value_type<decltype(out)>>)
     {
-        std::transform(std::make_move_iterator(std::begin(c)),
-                       std::make_move_iterator(std::end(c)),
-                       std::back_inserter(out),
-                       std::forward<TransformerT>(t));
+        std::transform(std::make_move_iterator(std::begin(c)), std::make_move_iterator(std::end(c)),
+                       std::back_inserter(out), std::forward<TransformerT>(t));
     }
     else
     {

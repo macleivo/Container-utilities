@@ -31,10 +31,12 @@ auto g_ret_val = int { 0 };
 template<typename ContainerT1, typename ContainerT2>
 bool cmp(const ContainerT1& c1, const ContainerT2& c2)
 {
-    if (c1.size() != c2.size()) return false;
+    if (c1.size() != c2.size())
+        return false;
     for (size_t i = 0; i < c1.size(); ++i)
     {
-        if (c1[i] != c2[i]) return false;
+        if (c1[i] != c2[i])
+            return false;
     }
     return true;
 }
@@ -392,62 +394,56 @@ void test_compile_time_map()
 {
     using my_type_map = mleivo::type_traits::type_map<int, char, double, float>;
     static_assert(std::is_same_v<my_type_map::value<int>, char>);
-//    static_assert(std::is_same_v<my_type_map::value<bool>, char>);
+    //    static_assert(std::is_same_v<my_type_map::value<bool>, char>);
 }
 
 void test_transform()
 {
     {
-        auto in = std::vector<move_only_type>{};
+        auto in = std::vector<move_only_type> {};
         in.emplace_back(0);
         in.emplace_back(1);
         in.emplace_back(2);
         in.emplace_back(3);
-        auto out = mleivo::cu::transform(std::move(in), [](move_only_type&& i) {
-            return static_cast<double>(*i.m_val) * static_cast<double>(*i.m_val);
-        });
+        auto out = mleivo::cu::transform(std::move(in),
+                                         [](move_only_type&& i)
+                                         { return static_cast<double>(*i.m_val) * static_cast<double>(*i.m_val); });
         for (int i = 0; i < 4; i++)
         {
-            COMPARE(1.0*i*i, out[i]);
+            COMPARE(1.0 * i * i, out[i]);
         }
     }
     {
-        auto in = std::vector<int>{};
+        auto in = std::vector<int> {};
         in.emplace_back(0);
         in.emplace_back(1);
         in.emplace_back(2);
         in.emplace_back(3);
-        auto out = mleivo::cu::transform(std::move(in), [](int i) {
-            return move_only_type(i);
-        });
+        auto out = mleivo::cu::transform(std::move(in), [](int i) { return move_only_type(i); });
         for (int i = 0; i < 4; i++)
         {
             COMPARE(i, *out[i].m_val);
         }
     }
     {
-        auto in = std::vector<int>{};
+        auto in = std::vector<int> {};
         in.emplace_back(0);
         in.emplace_back(1);
         in.emplace_back(2);
         in.emplace_back(3);
-        auto out = mleivo::cu::transform(std::move(in), [](int i) {
-            return copy_only_type(i);
-        });
+        auto out = mleivo::cu::transform(std::move(in), [](int i) { return copy_only_type(i); });
         for (int i = 0; i < 4; i++)
         {
             COMPARE(i, out[i].m_val);
         }
     }
     {
-        auto in = std::vector<copy_only_type>{};
+        auto in = std::vector<copy_only_type> {};
         in.emplace_back(0);
         in.emplace_back(1);
         in.emplace_back(2);
         in.emplace_back(3);
-        auto out = mleivo::cu::transform(std::move(in), [](const copy_only_type& i) {
-            return i.m_val;
-        });
+        auto out = mleivo::cu::transform(std::move(in), [](const copy_only_type& i) { return i.m_val; });
         for (int i = 0; i < 4; i++)
         {
             COMPARE(i, out[i]);
@@ -474,7 +470,7 @@ void test_cont()
 
 void test_all_of()
 {
-    std::set<int> s{1, 3, 5};
+    std::set<int> s { 1, 3, 5 };
     COMPARE(true, mleivo::cu::all_of(s, [](int i) { return i % 2; }));
 
     s.insert(2);
@@ -483,7 +479,7 @@ void test_all_of()
 
 void test_any_of()
 {
-    std::set<int> s{1, 3, 5};
+    std::set<int> s { 1, 3, 5 };
     COMPARE(true, mleivo::cu::any_of(s, [](int i) { return i % 2; }));
 
     s.insert(2);
@@ -494,7 +490,7 @@ void test_any_of()
 
 void test_remove_duplicates()
 {
-    std::vector<int> v{ 0, 1, 0, 1, 2, 2, 2, 3, 2, 2};
+    std::vector<int> v { 0, 1, 0, 1, 2, 2, 2, 3, 2, 2 };
     mleivo::cu::remove_duplicates(v);
     COMPARE(4, v.size());
     for (int i = 0; i < v.size(); ++i)
@@ -509,38 +505,38 @@ class TD;
 void test_remove_all()
 {
     {
-        std::vector<int> v{ 1,2,1,2,1};
+        std::vector<int> v { 1, 2, 1, 2, 1 };
         mleivo::cu::remove_all(v, 1);
-        COMPARE(true, cmp(std::vector<int>{2, 2}, v));
+        COMPARE(true, cmp(std::vector<int> { 2, 2 }, v));
         mleivo::cu::remove_all(v, 2);
         COMPARE(0, v.size());
     }
     {
-        std::vector<int> v{0,1,2,3,4,5};
-        mleivo::cu::remove_all(v, [](int i) { return i % 2 == 0;});
-        COMPARE(true, cmp(std::vector<int>{1,3,5}, v));
+        std::vector<int> v { 0, 1, 2, 3, 4, 5 };
+        mleivo::cu::remove_all(v, [](int i) { return i % 2 == 0; });
+        COMPARE(true, cmp(std::vector<int> { 1, 3, 5 }, v));
     }
 }
 
 void test_move_to_index()
 {
     {
-        std::vector<int> v{3,1,2,0};
+        std::vector<int> v { 3, 1, 2, 0 };
         mleivo::cu::move_to_index(v, 3, 0);
-        COMPARE(true, cmp(std::vector<int>{0,3,1,2}, v));
+        COMPARE(true, cmp(std::vector<int> { 0, 3, 1, 2 }, v));
 
         mleivo::cu::move_to_index(v, 1, 3);
-        COMPARE(true, cmp(std::vector<int>{0,1,2,3}, v));
+        COMPARE(true, cmp(std::vector<int> { 0, 1, 2, 3 }, v));
 
         mleivo::cu::move_to_index(v, 1, 1);
-        COMPARE(true, cmp(std::vector<int>{0,1,2,3}, v));
+        COMPARE(true, cmp(std::vector<int> { 0, 1, 2, 3 }, v));
     }
 }
 
 void test_pop_front()
 {
     {
-        std::vector<int> v{ 0, 1, 2 };
+        std::vector<int> v { 0, 1, 2 };
         mleivo::cu::pop_front(v);
         COMPARE(1, v.front())
         COMPARE(2, v.size())
@@ -557,7 +553,7 @@ void test_pop_front()
 void test_static_cast_all()
 {
     {
-        auto v = std::vector<double>{ 0, 1, 2};
+        auto v = std::vector<double> { 0, 1, 2 };
         auto ints = mleivo::cu::static_cast_all<int>(v);
         static_assert(std::is_same_v<decltype(ints), std::vector<int>>);
         COMPARE(3, ints.size())
@@ -567,7 +563,7 @@ void test_static_cast_all()
         }
     }
     {
-        auto v = std::deque<double>{ 0, 1, 2};
+        auto v = std::deque<double> { 0, 1, 2 };
         auto ints = mleivo::cu::static_cast_all<int>(v);
         static_assert(std::is_same_v<decltype(ints), std::deque<int>>);
         COMPARE(3, ints.size())
@@ -600,7 +596,7 @@ void test_static_cast_all()
 void test_index_of()
 {
     {
-        auto v = std::vector<int>{0,1,2,3,4,5};
+        auto v = std::vector<int> { 0, 1, 2, 3, 4, 5 };
         for (int i = 0; i < v.size(); ++i)
         {
             COMPARE(i, mleivo::cu::index_of(v, i));
@@ -609,7 +605,7 @@ void test_index_of()
         COMPARE(6, mleivo::cu::index_of(v, -42));
     }
     {
-        auto v = std::vector<int>{0,1,2,3,4,5};
+        auto v = std::vector<int> { 0, 1, 2, 3, 4, 5 };
         for (int i = 0; i < v.size(); ++i)
         {
             COMPARE(i, mleivo::cu::index_of(v, [i](int j) { return i == j; }));
