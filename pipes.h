@@ -30,7 +30,7 @@ struct wrapper {
     using mleivo_pipe = std::true_type;
 
     std::tuple<Args...> m_t;
-    wrapper(Args... args) : m_t(std::forward<Args>(args)...) {
+    constexpr wrapper(Args... args) : m_t(std::forward<Args>(args)...) {
     }
 
     template <typename ContainerT>
@@ -51,7 +51,7 @@ struct ret_wrapper {
     using mleivo_pipe_ret = std::true_type;
 
     std::tuple<Args...> m_t;
-    ret_wrapper(Args... args) : m_t(std::forward<Args>(args)...) {
+    constexpr ret_wrapper(Args... args) : m_t(std::forward<Args>(args)...) {
     }
 
     template <typename ContainerT>
@@ -68,7 +68,7 @@ struct ret_wrapper {
 } // namespace detail
 
 #define MLEIVO_STL_WRAPPER(FUNCTION_NAME)                                                                              \
-    namespace {                                                                                                        \
+    namespace detail {                                                                                                 \
     struct FUNCTION_NAME {                                                                                             \
         template <typename... Args>                                                                                    \
         static constexpr decltype(auto) call(Args&&... args) {                                                         \
@@ -79,12 +79,12 @@ struct ret_wrapper {
                                                                                                                        \
     template <typename... Args>                                                                                        \
     constexpr decltype(auto) FUNCTION_NAME(Args&&... args) {                                                           \
-        return detail::wrapper<struct FUNCTION_NAME, decltype(args)...>{std::forward<decltype(args)>(args)...};        \
+        return detail::wrapper<detail::FUNCTION_NAME, decltype(args)...>{std::forward<decltype(args)>(args)...};       \
     };
 
 #define MLEIVO_STL_WRAPPER_RET(FUNCTION_NAME)                                                                          \
-    namespace {                                                                                                        \
-    struct FUNCTION_NAME {                                                                                             \
+    namespace detail {                                                                                                        \
+    struct FUNCTION_NAME {                                                                                      \
         template <typename... Args>                                                                                    \
         static constexpr auto call(Args&&... args) {                                                                   \
             return std::FUNCTION_NAME(std::forward<decltype(args)>(args)...);                                          \
@@ -94,7 +94,7 @@ struct ret_wrapper {
                                                                                                                        \
     template <typename... Args>                                                                                        \
     constexpr auto FUNCTION_NAME(Args&&... args) {                                                                     \
-        return detail::ret_wrapper<struct FUNCTION_NAME, decltype(args)...>(std::forward<decltype(args)>(args)...);    \
+        return detail::ret_wrapper<detail::FUNCTION_NAME, decltype(args)...>(std::forward<decltype(args)>(args)...);   \
     }
 
 MLEIVO_STL_WRAPPER(for_each)
