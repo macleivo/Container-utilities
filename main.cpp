@@ -97,6 +97,8 @@ void test_contains()
     }
 }
 
+template<class T>
+class TD;
 void test_merge()
 {
     {

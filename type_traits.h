@@ -8,28 +8,34 @@ namespace cu::type_traits
 template<typename ContainerT>
 using value_type = typename std::decay_t<ContainerT>::value_type;
 
-#define GLUE_HELPER(x, y) x##y
-#define GLUE(x, y) GLUE_HELPER(x, y)
+#define CONTAINER_UTILS_GLUE_HELPER(x, y) x##y
+#define CONTAINER_UTILS_GLUE(x, y) CONTAINER_UTILS_GLUE_HELPER(x, y)
 
 #define CONTAINER_UTILS_HAS_METHOD(NAME, RETURN_TYPE, ARG)                                                             \
     template<typename ContainerT, typename = void>                                                                     \
-    struct GLUE(has_method_, NAME) : std::false_type                                                                   \
+    struct CONTAINER_UTILS_GLUE(has_method_, NAME) : std::false_type                                                   \
     {                                                                                                                  \
     };                                                                                                                 \
                                                                                                                        \
     template<typename ContainerT>                                                                                      \
-    struct GLUE(has_method_,                                                                                           \
-                NAME)<ContainerT, std::void_t<decltype(std::declval<std::decay_t<ContainerT>>().NAME(ARG))>>           \
-        : std::bool_constant<std::is_same_v<bool, decltype(std::declval<std::decay_t<ContainerT>>().NAME(ARG))>>       \
+    struct CONTAINER_UTILS_GLUE(                                                                                       \
+            has_method_, NAME)<ContainerT, std::void_t<decltype(std::declval<std::decay_t<ContainerT>>().NAME(ARG))>>  \
+        : std::bool_constant<                                                                                          \
+                  std::is_same_v<RETURN_TYPE, decltype(std::declval<std::decay_t<ContainerT>>().NAME(ARG))>>           \
     {                                                                                                                  \
     };                                                                                                                 \
                                                                                                                        \
     template<typename ContainerT>                                                                                      \
-    inline constexpr bool GLUE(GLUE(has_method_, NAME), _v) = GLUE(has_method_, NAME)<ContainerT>::value;
+    inline constexpr bool CONTAINER_UTILS_GLUE(CONTAINER_UTILS_GLUE(has_method_, NAME), _v) =                          \
+            CONTAINER_UTILS_GLUE(has_method_, NAME)<ContainerT>::value;
 
 CONTAINER_UTILS_HAS_METHOD(contains, bool, std::declval<value_type<ContainerT>>())
 
-CONTAINER_UTILS_HAS_METHOD(count, std::size_t, std::declval<value_type<ContainerT>>())
+CONTAINER_UTILS_HAS_METHOD(count, size_t, std::declval<value_type<ContainerT>>())
+
+#undef CONTAINER_UTILS_GLUE_HELPER
+#undef CONTAINER_UTILS_GLUE
+#undef CONTAINER_UTILS_HAS_METHOD
 
 // value_types_are_equal
 template<typename ContainerT1, typename... ContainerT2ToN>
