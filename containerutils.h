@@ -26,6 +26,17 @@ namespace mleivo::cu
 {
 using ::mleivo::type_traits::value_type;
 
+namespace detail
+{
+template<typename To, typename From>
+auto copy_to(const From& from)
+{
+    using std::cbegin;
+    using std::cend;
+    return To(cbegin(from), cend(from));
+}
+}
+
 template<typename ContainerT>
 std::vector<value_type<ContainerT>> to_std_vector(ContainerT&& c);
 
@@ -51,10 +62,7 @@ bool any_of(const ContainerT& container, UnaryPredicate&& predicate)
 template<typename T, typename ValueT, template<typename...> typename ContainerT, typename... ContainerTArgs>
 auto static_cast_all(const ContainerT<ValueT, ContainerTArgs...>& container)
 {
-    using std::back_inserter;
-    using std::begin;
-    using std::end;
-    return ContainerT<T>(begin(container), end(container));
+    return detail::copy_to<ContainerT<T>>(container);
 }
 
 template<typename OutT, typename InT, size_t N>
@@ -82,10 +90,7 @@ auto static_cast_all(const ContainerT<FromT, N>& container)
 template<typename T, typename ContainerT> // fall back to returning an std::vector
 auto static_cast_all(const ContainerT& container)
 {
-    using std::back_inserter;
-    using std::begin;
-    using std::end;
-    return std::vector<T>(begin(container), end(container));
+    return detail::copy_to<std::vector<T>>(container);
 }
 
 // contains
