@@ -32,44 +32,74 @@ template <typename T>
 constexpr typename add_const<T>::type& as_const(T& t) noexcept {
     return as_const(t);
 }
-
-template<template<typename...> typename Primary, typename T>
-struct is_specialization_of : std::false_type {};
-
-template<template<typename...> typename Primary, typename... Args>
-struct is_specialization_of<Primary, Primary<Args...>> : std::true_type {};
-
-template<typename T, template<typename...> typename Primary>
-constexpr bool is_specialization_of_v = is_specialization_of<Primary, T>::value;
-}
+} // namespace
 
 namespace mleivo {
 template <typename T>
 class propagate_const {
-    T m_ptr;
+    T m_ptr{nullptr};
     using element_type = std::remove_reference_t<decltype(*std::declval<T&>())>;
+
+    template <typename U>
+    struct is_propagate_const : std::false_type {};
+
+    template <typename U>
+    struct is_propagate_const<propagate_const<U>> : std::true_type {};
+
+    template <typename U>
+    static constexpr auto is_propagate_const_v = is_propagate_const<U>::value;
 
 public:
     constexpr propagate_const() = default;
     constexpr propagate_const(propagate_const&& p) = default;
 
-    template<typename U, typename = std::enable_if_t<std::is_constructible_v<T, U>>> // TODO: make conditionally explicit
-    constexpr propagate_const(propagate_const<U>&& u) : m_ptr(std::move<U>(u.get())) { }
+    template <typename U, typename std::enable_if_t<
+                              std::is_constructible_v<T, U> and not std::is_convertible<U, T>::value, int> = 0>
+    explicit constexpr propagate_const(propagate_const<U>&& u) : m_ptr(std::move<U>(u.get())) {
+    }
 
-    template<typename U, typename = std::enable_if_t<std::is_constructible_v<T, U>>,
-    typename = std::enable_if_t<not is_specialization_of_v<U, propagate_const>>>
-    constexpr propagate_const(U&& u) : m_ptr(std::forward<U>(u)) { }
+    template <typename U,
+              typename std::enable_if_t<std::is_constructible_v<T, U> and std::is_convertible<U, T>::value, int> = 1>
+    constexpr propagate_const(propagate_const<U>&& u) : m_ptr(std::move<U>(u.get())) {
+    }
 
-    constexpr element_type* get() { return m_ptr; }
-    constexpr const element_type* get() const { return m_ptr; }
+    template <typename U, typename std::enable_if_t<std::is_constructible_v<T, U> and not is_propagate_const_v<U>
+                                                        and not std::is_convertible_v<U, T>,
+                                                    int> = 0>
+    constexpr propagate_const(U&& u) : m_ptr(std::forward<U>(u)) {
+    }
 
-    constexpr element_type* operator->() { return m_ptr; }
-    constexpr const element_type* operator->() const { return m_ptr; }
+    template <typename U, typename std::enable_if_t<std::is_constructible_v<T, U> and not is_propagate_const_v<U>
+                                                        and std::is_convertible_v<U, T>,
+                                                    int> = 1>
+    constexpr propagate_const(U&& u) : m_ptr(std::forward<U>(u)) {
+    }
 
-    constexpr element_type& operator*() { return *m_ptr; }
-    constexpr const element_type& operator*() const { return *m_ptr; }
+    propagate_const(const propagate_const&) = delete;
 
-    explicit constexpr operator bool() const { return get() != nullptr; }
+    constexpr element_type* get() {
+        return m_ptr;
+    }
+    constexpr const element_type* get() const {
+        return m_ptr;
+    }
 
+    constexpr element_type* operator->() {
+        return m_ptr;
+    }
+    constexpr const element_type* operator->() const {
+        return m_ptr;
+    }
+
+    constexpr element_type& operator*() {
+        return *m_ptr;
+    }
+    constexpr const element_type& operator*() const {
+        return *m_ptr;
+    }
+
+    explicit constexpr operator bool() const {
+        return get() != nullptr;
+    }
 };
 } // namespace mleivo

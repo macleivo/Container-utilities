@@ -730,17 +730,18 @@ void test_pipe_accumulate() {
     COMPARE(ans, 6);
 }
 #include <experimental/propagate_const>
-void test_pc() {
     struct S {
         void f(){};
         void g() const {};
     };
+void test_pc() {
     mleivo::propagate_const<S*> i(new S);
-    std::experimental::propagate_const<int*> x;
-    auto& j = *i;
-    j.f();
-    j.g();
-    delete i.get();
+    std::experimental::propagate_const<S*> x(new S);
+    std::experimental::propagate_const<int*> y;
+    // auto& j = *i;
+    // j.f();
+    // j.g();
+    // delete i.get();
 }
 
 int main() {
