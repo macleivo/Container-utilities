@@ -22,7 +22,7 @@
 #include <iostream>
 
 struct VerboseIntVector {
-    VerboseIntVector(std::vector<int> v = {}) : m_v(std::move(v)) {
+    VerboseIntVector(std::initializer_list<int> v = {}) : m_v(std::move(v)) {
         std::cout << "ctor verbose vector...\n";
     };
     ~VerboseIntVector() {
@@ -633,6 +633,10 @@ void test_static_cast_all() {
         for (const auto* d : as_der) {
             COMPARE((*d)(), 0xD);
         }
+
+        for (auto* d : as_base) {
+            delete d;
+        }
     }
 }
 
@@ -679,8 +683,9 @@ void test_pipe_for_each() {
 }
 
 void test_pipe_for_each_verbose() {
-    auto v = VerboseIntVector(std::vector<int>{0, 1, 2, 3}) | mleivo::pipes::for_each([](int& i) { i += i; })
-             | mleivo::pipes::for_each([](int& i) { i += i; }) | mleivo::pipes::for_each([](int& i) { i += i; });
+    auto f = [](int& i) { i += i; };
+    auto v = VerboseIntVector({0, 1, 2, 3}) | mleivo::pipes::for_each(f) | mleivo::pipes::for_each(f)
+             | mleivo::pipes::for_each(f);
     for (int i = 0; i < v.size(); ++i) {
         COMPARE(i * 8, v[i]);
     }

@@ -30,7 +30,7 @@ struct wrapper {
                 using std::end;
                 CallT::call(begin(container), end(container), std::forward<decltype(args)>(args)...);
             },
-            m_t);
+            std::move(m_t));
         return std::forward<decltype(container)>(container);
     }
 };
