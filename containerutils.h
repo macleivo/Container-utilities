@@ -185,12 +185,16 @@ void move_to_index(ContainerT& container,
 }
 
 // index_of
-template<typename ContainerT>
-auto index_of(const ContainerT& container, const value_type<ContainerT>& itemToFind)
+template<typename ContainerT, typename T>
+auto index_of(const ContainerT& container, T&& predOrItem)
 {
     using std::cbegin;
     using std::cend;
-    return std::distance(cbegin(container), std::find(cbegin(container), cend(container), itemToFind));
+    if constexpr (std::is_same_v<value_type<ContainerT>, std::decay_t<T>>)
+        return std::distance(cbegin(container), std::find(cbegin(container), cend(container), predOrItem));
+    else
+        return std::distance(cbegin(container),
+                             std::find_if(cbegin(container), cend(container), std::forward<T>(predOrItem)));
 }
 
 // pop_front

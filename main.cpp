@@ -589,6 +589,26 @@ void test_static_cast_all()
     }
 }
 
+void test_index_of()
+{
+    {
+        auto v = std::vector<int>{0,1,2,3,4,5};
+        for (int i = 0; i < v.size(); ++i)
+        {
+            COMPARE(i, mleivo::cu::index_of(v, i));
+        }
+        COMPARE(6, mleivo::cu::index_of(v, 6));
+        COMPARE(6, mleivo::cu::index_of(v, -42));
+    }
+    {
+        auto v = std::vector<int>{0,1,2,3,4,5};
+        for (int i = 0; i < v.size(); ++i)
+        {
+            COMPARE(i, mleivo::cu::index_of(v, [i](int j) { return i == j; }));
+        }
+    }
+}
+
 int main()
 {
     test_merge();
@@ -606,5 +626,6 @@ int main()
     test_move_to_index();
     test_pop_front();
     test_static_cast_all();
+    test_index_of();
     return g_ret_val;
 }
