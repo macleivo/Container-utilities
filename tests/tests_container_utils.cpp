@@ -9,6 +9,7 @@
 TEST_CASE("test_Enumerate()", "container utils") {
     {
         auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        static_assert(std::is_same_v<decltype(test)&, decltype(mleivo::cu::Enumerate{test}.m_container)>);
         for (auto&& [i, e] : mleivo::cu::Enumerate{test}) {
             REQUIRE(e == 'a' + i);
             ++e;
@@ -39,6 +40,7 @@ TEST_CASE("test_Enumerate()", "container utils") {
     }
     {
         const auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        static_assert(std::is_same_v<decltype(test)&, decltype(mleivo::cu::Enumerate{test}.m_container)>);
         for (auto&& [i, e] : mleivo::cu::Enumerate{test}) {
             REQUIRE(e == 'a' + i);
         }
@@ -56,6 +58,7 @@ TEST_CASE("test_Enumerate()", "container utils") {
         }
     }
     {
+        static_assert(std::is_same_v<std::vector<char>, decltype(mleivo::cu::Enumerate{std::vector<char>{'a', 'b', 'c', 'd', 'e'}}.m_container)>);
         for (auto&& [i, e] : mleivo::cu::Enumerate{std::vector<char>{'a', 'b', 'c', 'd', 'e'}}) {
             REQUIRE(e == 'a' + i);
             ++e;
@@ -63,6 +66,7 @@ TEST_CASE("test_Enumerate()", "container utils") {
     }
     {
         auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        static_assert(std::is_same_v<std::vector<char>, decltype(mleivo::cu::Enumerate{std::move(test)}.m_container)>);
         for (auto&& [i, e] : mleivo::cu::Enumerate{std::move(test)}) {
             REQUIRE(e == 'a' + i);
             ++e;
