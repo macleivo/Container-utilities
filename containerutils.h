@@ -96,6 +96,33 @@ std::vector<std::decay_t<ContainerT>> split(ContainerT&& c, const value_type<Con
     return out;
 }
 
+// transform
+template<typename ContainerT, typename TransformerT>
+auto transform(ContainerT&& c, TransformerT&& t)
+{
+    using t_ret_val = decltype(std::declval<TransformerT>()(std::declval<value_type<ContainerT>>()));
+    std::conditional_t<std::is_same_v<value_type<ContainerT>, t_ret_val>,
+                       std::decay_t<ContainerT>,
+                       std::vector<t_ret_val>>
+      out;
+    if constexpr (std::is_rvalue_reference_v<decltype(c)> && std::is_move_constructible_v<value_type<decltype(out)>>)
+    {
+        std::transform(std::make_move_iterator(std::begin(c)),
+                       std::make_move_iterator(std::end(c)),
+                       std::back_inserter(out),
+                       std::forward<TransformerT>(t));
+    }
+    else
+    {
+        for (auto i : c)
+        {
+            auto tmp = t(i);
+            out.push_back(tmp);
+        }
+    }
+    return out;
+}
+
 // to_std_vector
 template<typename ContainerT>
 std::vector<value_type<ContainerT>> to_std_vector(ContainerT&& c)

@@ -350,6 +350,66 @@ void test_to_std_vector()
     }
 }
 
+void test_transform()
+{
+    {
+        auto in = std::vector<move_only_type>{};
+        in.emplace_back(0);
+        in.emplace_back(1);
+        in.emplace_back(2);
+        in.emplace_back(3);
+        auto out = cu::transform(std::move(in), [](move_only_type&& i) {
+            return static_cast<double>(*i.m_val) * static_cast<double>(*i.m_val);
+        });
+        for (int i = 0; i < 4; i++)
+        {
+            COMPARE(1.0*i*i, out[i]);
+        }
+    }
+    {
+        auto in = std::vector<int>{};
+        in.emplace_back(0);
+        in.emplace_back(1);
+        in.emplace_back(2);
+        in.emplace_back(3);
+        auto out = cu::transform(std::move(in), [](int i) {
+            return move_only_type(i);
+        });
+        for (int i = 0; i < 4; i++)
+        {
+            COMPARE(i, *out[i].m_val);
+        }
+    }
+    {
+        auto in = std::vector<int>{};
+        in.emplace_back(0);
+        in.emplace_back(1);
+        in.emplace_back(2);
+        in.emplace_back(3);
+        auto out = cu::transform(std::move(in), [](int i) {
+            return copy_only_type(i);
+        });
+        for (int i = 0; i < 4; i++)
+        {
+            COMPARE(i, out[i].m_val);
+        }
+    }
+    {
+        auto in = std::vector<copy_only_type>{};
+        in.emplace_back(0);
+        in.emplace_back(1);
+        in.emplace_back(2);
+        in.emplace_back(3);
+        auto out = cu::transform(std::move(in), [](const copy_only_type& i) {
+            return i.m_val;
+        });
+        for (int i = 0; i < 4; i++)
+        {
+            COMPARE(i, out[i]);
+        }
+    }
+}
+
 int main()
 {
     test_merge();
@@ -357,5 +417,6 @@ int main()
     test_split();
     test_to_std_vector();
     test_contains();
+    test_transform();
     return g_ret_val;
 }
