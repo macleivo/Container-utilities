@@ -4,24 +4,27 @@
 #include <iostream>
 #include <memory>
 #include <vector>
+#include <type_traits>
 
 struct Shape;
 struct Circle;
 struct Rectangle;
 
+// Visitors -----------------------------------------------------------------------------------------------------------
 struct ShapeVisitor {
     virtual ~ShapeVisitor() = default;
-    virtual std::any visit(Circle& shape) = 0;
-    virtual std::any visit(Rectangle& shape) = 0;
+    virtual std::any visit(Circle& circle) const = 0;
+    virtual std::any visit(Rectangle& rectangle) const = 0;
 };
 
 struct Draw : ShapeVisitor {
-    std::any visit(Circle& circle) override {
+    using ReturnT = void;
+    std::any visit(Circle& circle) const override {
         std::cout << "draw circle"
                   << "\n";
         return {};
     }
-    std::any visit(Rectangle& rectangle) override {
+    std::any visit(Rectangle& rectangle) const override {
         std::cout << "draw rectangle"
                   << "\n";
         return {};
@@ -29,19 +32,24 @@ struct Draw : ShapeVisitor {
 };
 
 struct GetName : ShapeVisitor {
-    std::any visit(Circle& circle) override {
-        return std::string{"i am a circle"};
+    using ReturnT = std::string;
+    std::any visit(Circle& circle) const override {
+        return ReturnT{"i am a circle"};
     }
-    std::any visit(Rectangle& rectangle) override {
-        return std::string{"i am a rectangle"};
+    std::any visit(Rectangle& rectangle) const override {
+        return ReturnT{"i am a rectangle"};
     }
 };
 
+// Actual classes -----------------------------------------------------------------------------------------------------
 struct Shape {
     virtual ~Shape() = default;
 
-    template <typename ReturnT>
-    ReturnT accept(ShapeVisitor& visitor) {
+    template <typename VisitorT>
+    decltype(auto) accept(VisitorT&& visitor) {
+        using T = std::remove_cv_t<std::remove_reference_t<VisitorT>>;
+        static_assert(std::is_base_of_v<ShapeVisitor, T>, "VisitorT does not inherit from ShapeVisitor!");
+        using ReturnT = typename T::ReturnT;
         if constexpr (std::is_same_v<void, ReturnT>)
             doAccept(visitor);
         else
@@ -49,19 +57,17 @@ struct Shape {
     }
 
 private:
-    virtual std::any doAccept(ShapeVisitor& visitor) = 0;
+    virtual std::any doAccept(const ShapeVisitor& visitor) = 0;
 };
 
-struct Circle : Shape {
-private:
-    std::any doAccept(ShapeVisitor& visitor) override {
+class Circle : public Shape {
+    std::any doAccept(const ShapeVisitor& visitor) override {
         return visitor.visit(*this);
     }
 };
 
-struct Rectangle : Shape {
-private:
-    std::any doAccept(ShapeVisitor& visitor) override {
+class Rectangle : public Shape {
+    std::any doAccept(const ShapeVisitor& visitor) override {
         return visitor.visit(*this);
     }
 };
@@ -71,13 +77,11 @@ TEST_CASE("test_visitor)", "[visitor]") {
     v.emplace_back(std::make_unique<Circle>());
     v.emplace_back(std::make_unique<Rectangle>());
     for (auto&& uptr : v) {
-        auto draw = Draw{};
-        uptr->accept<void>(draw);
+        uptr->accept(Draw{});
     }
 
     for (auto&& uptr : v) {
-        auto getName = GetName{};
-        auto result = uptr->accept<std::string>(getName);
+        auto result = uptr->accept(GetName{});
         std::cout << result << "\n";
     }
 }
