@@ -5,6 +5,153 @@
 #include "containerutils.h"
 #include "helpers.h"
 
+template <typename It>
+struct iter_value_type {
+    size_t m_index;
+    It m_iter;
+};
+
+template <typename It>
+struct iter {
+    iter(size_t i, It it) : m_value{i, std::move(it)} {
+    }
+
+    auto& operator++() {
+        ++m_value.m_index;
+        ++m_value.m_iter;
+        return *this;
+    }
+
+    auto& operator*() {
+        return m_value;
+    }
+
+    bool operator!=(const iter& rhs) {
+        return m_value.m_iter != rhs.m_value.m_iter || m_value.m_index != rhs.m_value.m_index;
+    }
+
+    iter_value_type<It> m_value;
+};
+
+template <int Index, typename It>
+auto get(iter_value_type<It>&& it) {
+    if constexpr (Index == 0)
+        return it.m_index;
+    else if constexpr (Index == 1)
+        return *it.m_iter;
+}
+
+template <int Index, typename It>
+auto& get(iter_value_type<It>& it) {
+    if constexpr (Index == 0)
+        return it.m_index;
+    else if constexpr (Index == 1)
+        return *it.m_iter;
+}
+
+template <int Index, typename It>
+const auto& get(const iter_value_type<It>& it) {
+    if constexpr (Index == 0)
+        return it.m_index;
+    else if constexpr (Index == 1)
+        return *it.m_iter;
+}
+
+namespace std {
+template <typename It>
+struct tuple_size<iter_value_type<It>> : std::integral_constant<size_t, 2> {};
+
+template <typename It>
+struct tuple_element<0, iter_value_type<It>> {
+    using type = size_t;
+};
+
+template <typename It>
+struct tuple_element<1, iter_value_type<It>> {
+    using type = std::remove_reference_t<decltype(*std::declval<It>())>;
+};
+} // namespace std
+
+struct empty_struct {};
+
+template <typename ContainerT, typename It>
+struct enumerate_struct
+    : std::conditional_t<std::is_rvalue_reference_v<ContainerT>, std::remove_reference_t<ContainerT>, empty_struct> {
+    enumerate_struct(It begin, It end, size_t size) : m_begin(std::move(begin)), m_end(std::move(end)), m_size(size) {
+    }
+
+    template <typename X = ContainerT, typename = std::enable_if_t<std::is_rvalue_reference_v<X>>>
+    enumerate_struct(ContainerT container)
+        : std::remove_reference_t<ContainerT>(std::move(container)),
+          m_begin(std::begin(static_cast<std::remove_reference_t<ContainerT>&>(*this))),
+          m_end(std::end(static_cast<std::remove_reference_t<ContainerT>&>(*this))),
+          m_size(std::size(static_cast<std::remove_reference_t<ContainerT>&>(*this))) {
+    }
+
+    auto begin() {
+        return iter<decltype(m_begin)>{size_t{0}, m_begin};
+    }
+    auto end() {
+        return iter<decltype(m_end)>{size_t{m_size}, m_end};
+    }
+
+    It m_begin;
+    It m_end;
+    size_t m_size;
+};
+
+template <typename ContainerT>
+auto enumerate(ContainerT&& v) {
+    using std::begin;
+    using std::end;
+    using std::size;
+    using IterType = std::remove_reference_t<std::remove_cv_t<decltype(begin(v))>>;
+    if constexpr (std::is_rvalue_reference_v<decltype(v)>) {
+        return enumerate_struct<ContainerT&&, IterType>(std::move(v));
+    } else {
+        return enumerate_struct<decltype(v), IterType>{begin(v), end(v), size(v)};
+    }
+}
+
+TEST_CASE( "test_enumerate()", "container utils" ) {
+    {
+        auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto&& [i, e] : enumerate(test)) {
+            REQUIRE(e == 'a' + i);
+            ++e;
+        }
+
+        for (auto i = 0; i < test.size(); ++i)
+            REQUIRE(test.at(i) == 'a' + 1 + i);
+    }
+    {
+        auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto& [i, e] : enumerate(test)) {
+            REQUIRE(e == 'a' + i);
+            ++e;
+        }
+
+        for (auto i = 0; i < test.size(); ++i)
+            REQUIRE(test.at(i) == 'a' + 1 + i);
+    }
+    {
+        auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto [i, e] : enumerate(test)) {
+            REQUIRE(e == 'a' + i);
+            ++e;
+        }
+
+        for (auto i = 0; i < test.size(); ++i)
+            REQUIRE(test.at(i) == 'a' + i);
+    }
+    {
+        for (auto&& [i, e] : enumerate(std::vector<char>{'a', 'b', 'c', 'd', 'e'})) {
+            REQUIRE(e == 'a' + i);
+            ++e;
+        }
+    }
+}
+
 TEST_CASE( "test_remove_all()" , "[container utils]" ) {
     {
         std::vector<int> v{1, 2, 1, 2, 1};
