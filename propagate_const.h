@@ -253,3 +253,45 @@ struct std::hash<mleivo::propagate_const<T>> {
         return std::hash<T>{}(pt.get());
     }
 };
+
+template<typename T>
+struct std::equal_to<mleivo::propagate_const<T>> {
+    constexpr bool operator()(const mleivo::propagate_const<T>& lhs, const mleivo::propagate_const<T>& rhs) {
+        return lhs == rhs;
+    }
+};
+
+template <typename T>
+struct std::not_equal_to<mleivo::propagate_const<T>> {
+    constexpr bool operator()(const mleivo::propagate_const<T>& lhs, const mleivo::propagate_const<T>& rhs) {
+        return lhs != rhs;
+    }
+};
+
+template <typename T>
+struct std::less<mleivo::propagate_const<T>> {
+    constexpr bool operator()(const mleivo::propagate_const<T>& lhs, const mleivo::propagate_const<T>& rhs) {
+        return lhs < rhs;
+    }
+};
+
+template <typename T>
+struct std::greater<mleivo::propagate_const<T>> {
+    constexpr bool operator()(const mleivo::propagate_const<T>& lhs, const mleivo::propagate_const<T>& rhs) {
+        return lhs > rhs;
+    }
+};
+
+template <typename T>
+struct std::less_equal<mleivo::propagate_const<T>> {
+    constexpr bool operator()(const mleivo::propagate_const<T>& lhs, const mleivo::propagate_const<T>& rhs) {
+        return lhs <= rhs;
+    }
+};
+
+template <typename T>
+struct std::greater_equal<mleivo::propagate_const<T>> {
+    constexpr bool operator()(const mleivo::propagate_const<T>& lhs, const mleivo::propagate_const<T>& rhs) {
+        return lhs >= rhs;
+    }
+};
