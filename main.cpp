@@ -23,6 +23,36 @@ struct move_only_type
     move_only_type& operator=(move_only_type&&) = default;
 
     int m_val;
+
+    friend bool operator<(const move_only_type& lhs, const move_only_type& rhs)
+    {
+        return lhs.m_val < rhs.m_val;
+    }
+};
+
+struct copy_only_type
+{
+    explicit copy_only_type(int val) : m_val(val)
+    {
+    }
+    ~copy_only_type() = default;
+    copy_only_type(const copy_only_type&) = default;
+    copy_only_type& operator=(const copy_only_type&) = default;
+    copy_only_type(copy_only_type&&) = delete;
+    copy_only_type& operator=(copy_only_type&&) = delete;
+
+    int m_val;
+
+    friend bool operator<(const copy_only_type& lhs, const copy_only_type& rhs)
+    {
+        return lhs.m_val < rhs.m_val;
+    }
+
+    friend void swap(copy_only_type& lhs, copy_only_type& rhs)
+    {
+        using std::swap;
+        swap(lhs.m_val, rhs.m_val);
+    }
 };
 
 void testMerge()
@@ -53,6 +83,23 @@ void testFilter()
 
     {
         auto v = std::vector<move_only_type> {};
+        v.emplace_back(5);
+        v.emplace_back(4);
+        v.emplace_back(3);
+        v.emplace_back(2);
+        v.emplace_back(1);
+        v.emplace_back(0);
+        auto even = cu::filter(std::move(v), [](const auto& i) { return i.m_val % 2 == 0; });
+        COMPARE(even.size(), 3);
+        std::sort(even.begin(), even.end());
+        for (int i = 0; i < 3; i++)
+        {
+            COMPARE(i * 2, even[i].m_val);
+        }
+    }
+
+    {
+        auto v = std::vector<copy_only_type> {};
         v.emplace_back(0);
         v.emplace_back(1);
         v.emplace_back(2);

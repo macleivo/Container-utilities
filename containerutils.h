@@ -10,8 +10,8 @@ using type_traits::value_type;
 template<typename ContainerT, typename Filter>
 std::vector<value_type<ContainerT>> filter(ContainerT&& c, Filter&& f)
 {
-    std::vector<value_type<ContainerT>> v;
-    if constexpr (std::is_rvalue_reference_v<decltype(c)> && std::is_move_assignable_v<value_type<ContainerT>>)
+    std::vector<value_type<decltype(c)>> v;
+    if constexpr (std::is_rvalue_reference_v<decltype(c)> && std::is_move_constructible_v<value_type<decltype(c)>>)
     {
         std::copy_if(std::make_move_iterator(std::begin(c)), std::make_move_iterator(std::end(c)),
                      std::back_inserter(v), std::forward<Filter>(f));
