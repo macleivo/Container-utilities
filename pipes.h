@@ -34,7 +34,7 @@ struct wrapper {
     }
 
     template <typename ContainerT>
-    inline constexpr decltype(auto) operator()(ContainerT&& container) {
+    constexpr decltype(auto) operator()(ContainerT&& container) {
         std::apply(
             [&](auto&&... args) {
                 using std::begin;
@@ -55,7 +55,7 @@ struct ret_wrapper {
     }
 
     template <typename ContainerT>
-    inline constexpr auto operator()(ContainerT&& container) {
+    constexpr auto operator()(ContainerT&& container) {
         return std::apply(
             [&](auto&&... args) {
                 using std::begin;
@@ -71,14 +71,14 @@ struct ret_wrapper {
     namespace {                                                                                                        \
     struct FUNCTION_NAME {                                                                                             \
         template <typename... Args>                                                                                    \
-        static inline constexpr decltype(auto) call(Args&&... args) {                                                  \
+        static constexpr decltype(auto) call(Args&&... args) {                                                         \
             std::FUNCTION_NAME(std::forward<decltype(args)>(args)...);                                                 \
         }                                                                                                              \
     };                                                                                                                 \
     }                                                                                                                  \
                                                                                                                        \
     template <typename... Args>                                                                                        \
-    inline constexpr decltype(auto) FUNCTION_NAME(Args&&... args) {                                                    \
+    constexpr decltype(auto) FUNCTION_NAME(Args&&... args) {                                                           \
         return wrapper<struct FUNCTION_NAME, decltype(args)...>{std::forward<decltype(args)>(args)...};                \
     };
 
@@ -86,14 +86,14 @@ struct ret_wrapper {
     namespace {                                                                                                        \
     struct FUNCTION_NAME {                                                                                             \
         template <typename... Args>                                                                                    \
-        static inline constexpr auto call(Args&&... args) {                                                            \
+        static constexpr auto call(Args&&... args) {                                                                   \
             return std::FUNCTION_NAME(std::forward<decltype(args)>(args)...);                                          \
         }                                                                                                              \
     };                                                                                                                 \
     }                                                                                                                  \
                                                                                                                        \
     template <typename... Args>                                                                                        \
-    inline constexpr auto FUNCTION_NAME(Args&&... args) {                                                              \
+    constexpr auto FUNCTION_NAME(Args&&... args) {                                                                     \
         return ret_wrapper<struct FUNCTION_NAME, decltype(args)...>(std::forward<decltype(args)>(args)...);            \
     }
 
@@ -110,12 +110,12 @@ MLEIVO_STL_WRAPPER_RET(accumulate)
 
 template <typename ContainerT, typename CallablePipeT,
           typename = typename std::remove_cv_t<std::remove_reference_t<CallablePipeT>>::mleivo_pipe>
-inline decltype(auto) constexpr operator|(ContainerT&& container, CallablePipeT&& f) {
+decltype(auto) constexpr operator|(ContainerT&& container, CallablePipeT&& f) {
     return f(std::forward<ContainerT>(container));
 }
 
 template <typename ContainerT, typename CallablePipeT,
           typename = typename std::remove_cv_t<std::remove_reference_t<CallablePipeT>>::mleivo_pipe_ret>
-inline auto constexpr operator|(ContainerT&& container, CallablePipeT&& f) {
+auto constexpr operator|(ContainerT&& container, CallablePipeT&& f) {
     return f(std::forward<ContainerT>(container));
 }
