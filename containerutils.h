@@ -98,6 +98,31 @@ merge(ContainerT1&& c1, ContainerT2ToN&&... c2ToN)
     return out;
 }
 
+template<typename ContainerT, typename EqualityCmp>
+void remove_duplicates(ContainerT& container, const EqualityCmp& cmp)
+{
+    using std::size;
+    auto n = size(container);
+    for (size_t i = 0; i < n; ++i)
+    {
+        const auto& item = container[i];
+        for (size_t j = n - 1; j > i; --j)
+        {
+            if (cmp(item, container[j]))
+            {
+                container.erase(container.begin() + j);
+                --n;
+            }
+        }
+    }
+}
+
+template<typename ContainerT>
+void remove_duplicates(ContainerT& container)
+{
+    remove_duplicates(container, std::equal_to{});
+}
+
 template<typename ContainerT>
 std::vector<std::decay_t<ContainerT>> split(ContainerT&& c, const value_type<ContainerT>& separator)
 {

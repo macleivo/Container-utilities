@@ -458,6 +458,17 @@ void test_all_of()
     COMPARE(false, mleivo::cu::all_of(s, [](int i) { return i % 2; }));
 }
 
+void test_remove_duplicates()
+{
+    std::vector<int> v{ 0, 1, 0, 1, 2, 2, 2, 3, 2, 2};
+    mleivo::cu::remove_duplicates(v);
+    COMPARE(4, v.size());
+    for (int i = 0; i < v.size(); ++i)
+    {
+        COMPARE(i, v[i]);
+    }
+}
+
 int main()
 {
     test_merge();
@@ -469,5 +480,6 @@ int main()
     test_compile_time_map();
     test_cont();
     test_all_of();
+    test_remove_duplicates();
     return g_ret_val;
 }
