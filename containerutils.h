@@ -447,7 +447,7 @@ struct tuple_size<mleivo::cu::detail::iter_value_type<It, SizeT>> : std::integra
 
 template <typename It, typename SizeT>
 struct tuple_element<0, mleivo::cu::detail::iter_value_type<It, SizeT>> {
-    using type = size_t;
+    using type = SizeT;
 };
 
 template <typename It, typename SizeT>

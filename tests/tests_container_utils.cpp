@@ -6,7 +6,35 @@
 #include "containerutils.h"
 #include "helpers.h"
 
+template <typename...>
+class TD;
 TEST_CASE("test_Enumerate()", "container utils") {
+    {
+        struct CharContainer : private std::vector<char> {
+            CharContainer(std::initializer_list<char>&& v) : std::vector<char>(std::move(v)) {
+            }
+
+            using std::vector<char>::begin;
+            using std::vector<char>::end;
+            using std::vector<char>::at;
+            int size() const {
+                return std::vector<char>::size();
+            }
+        };
+        auto test = CharContainer(std::initializer_list<char>{'a', 'b', 'c', 'd', 'e'});
+        static_assert(std::is_same_v<decltype(test)&, decltype(mleivo::cu::Enumerate{test}.m_container)>);
+        auto c = mleivo::cu::Enumerate{test};
+        auto iter = c.begin();
+        using std::get;
+        auto size_ = get<0>(*c.begin());
+        for (auto&& [i, e] : mleivo::cu::Enumerate{test}) {
+            REQUIRE(e == 'a' + i);
+            ++e;
+        }
+
+        for (auto i = 0; i < test.size(); ++i)
+            REQUIRE(test.at(i) == 'a' + 1 + i);
+    }
     {
         auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
         static_assert(std::is_same_v<decltype(test)&, decltype(mleivo::cu::Enumerate{test}.m_container)>);
@@ -58,7 +86,9 @@ TEST_CASE("test_Enumerate()", "container utils") {
         }
     }
     {
-        static_assert(std::is_same_v<std::vector<char>, decltype(mleivo::cu::Enumerate{std::vector<char>{'a', 'b', 'c', 'd', 'e'}}.m_container)>);
+        static_assert(
+            std::is_same_v<std::vector<char>,
+                           decltype(mleivo::cu::Enumerate{std::vector<char>{'a', 'b', 'c', 'd', 'e'}}.m_container)>);
         for (auto&& [i, e] : mleivo::cu::Enumerate{std::vector<char>{'a', 'b', 'c', 'd', 'e'}}) {
             REQUIRE(e == 'a' + i);
             ++e;
