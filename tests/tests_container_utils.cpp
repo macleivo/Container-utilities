@@ -494,3 +494,54 @@ TEST_CASE( "test_index_of()", "container utils" ) {
         }
     }
 }
+
+TEST_CASE( "test_irange()", "container utils") {
+    {
+        auto a = int{0};
+        auto b = int{10};
+        auto step = int{3};
+        auto v = mleivo::cu::irange(a, b, step);
+        auto ans = a;
+        for (auto i : v)
+        {
+            REQUIRE(ans == i);
+            ans += step;
+        }
+    }
+    {
+        auto a = int{10};
+        auto b = int{0};
+        auto step = int{-1};
+        auto v = mleivo::cu::irange(a, b, step);
+        auto ans = a;
+        for (auto i : v)
+        {
+            REQUIRE(ans == i);
+            ans += step;
+        }
+    }
+    {
+        auto a = int{10};
+        auto b = int{0};
+        auto step = int{-3};
+        auto v = mleivo::cu::irange(a, b, step);
+        auto ans = a;
+        for (auto i : v)
+        {
+            REQUIRE(ans == i);
+            ans += step;
+        }
+    }
+    {
+        auto a = int{10};
+        auto b = int{-10};
+        auto step = int{-3};
+        auto v = mleivo::cu::irange(a, b, step);
+        auto ans = a;
+        for (auto i : v)
+        {
+            REQUIRE(ans == i);
+            ans += step;
+        }
+    }
+}
