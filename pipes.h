@@ -28,8 +28,8 @@ template <typename CallT, typename... Args>
 struct wrapper {
     using mleivo_pipe = std::true_type;
 
-    std::tuple<Args&&...> m_t;
-    wrapper(Args&&... args) : m_t(std::forward<Args>(args)...) {
+    std::tuple<Args...> m_t;
+    wrapper(Args... args) : m_t(std::forward<Args>(args)...) {
     }
 
     template <typename ContainerT>
