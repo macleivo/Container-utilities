@@ -5,6 +5,52 @@
 #include "containerutils.h"
 #include "helpers.h"
 
+TEST_CASE("test_Enumerate()", "container utils") {
+    {
+        auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto&& [i, e] : mleivo::cu::Enumerate{test}) {
+            REQUIRE(e == 'a' + i);
+            ++e;
+        }
+
+        for (auto i = 0; i < test.size(); ++i)
+            REQUIRE(test.at(i) == 'a' + 1 + i);
+    }
+    {
+        auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto& [i, e] : mleivo::cu::Enumerate{test}) {
+            REQUIRE(e == 'a' + i);
+            ++e;
+        }
+
+        for (auto i = 0; i < test.size(); ++i)
+            REQUIRE(test.at(i) == 'a' + 1 + i);
+    }
+    {
+        auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto [i, e] : mleivo::cu::Enumerate{test}) {
+            REQUIRE(e == 'a' + i);
+            ++e;
+        }
+
+        for (auto i = 0; i < test.size(); ++i)
+            REQUIRE(test.at(i) == 'a' + i);
+    }
+    {
+        for (auto&& [i, e] : mleivo::cu::Enumerate{std::vector<char>{'a', 'b', 'c', 'd', 'e'}}) {
+            REQUIRE(e == 'a' + i);
+            ++e;
+        }
+    }
+    {
+        auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto&& [i, e] : mleivo::cu::Enumerate{std::move(test)}) {
+            REQUIRE(e == 'a' + i);
+            ++e;
+        }
+    }
+}
+
 TEST_CASE("test_enumerate()", "container utils") {
     {
         auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};

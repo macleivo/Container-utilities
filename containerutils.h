@@ -116,7 +116,48 @@ const auto& get(const iter_value_type<It>& it) {
     else if constexpr (Index == 1)
         return *it.m_iter;
 }
+
+template<typename T>
+constexpr auto begin_(T&& container)
+{
+    using std::begin;
+    return begin(container);
+}
+
+template<typename T>
+constexpr auto end_(T&& container)
+{
+    using std::end;
+    return end(container);
+}
+
+template<typename T>
+constexpr auto size_(T&& container)
+{
+    using std::size;
+    return size(container);
+}
 } // namespace detail
+
+template <typename ContainerT>
+struct Enumerate
+{
+    auto begin() {
+        auto it = detail::begin_(m_container);
+        return detail::iter<decltype(it)>{size_t{0}, it};
+    }
+    auto end() {
+        auto it = detail::end_(m_container);
+        return detail::iter<decltype(it)>{size_t{m_size}, it};
+    }
+
+    using T = std::conditional_t<std::is_rvalue_reference_v<ContainerT&&>, std::remove_cv_t<std::remove_reference_t<ContainerT>>, ContainerT&>;
+    T m_container;
+
+    decltype(detail::size_(m_container)) m_size = detail::size_(m_container);
+};
+template<typename ContainerT>
+Enumerate(ContainerT&&) -> Enumerate<ContainerT>;
 
 template <typename ContainerT>
 auto enumerate(ContainerT&& v) {
