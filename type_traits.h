@@ -54,14 +54,14 @@ template<typename Pred, typename... Args>
 struct is_predicate
 {
 private:
-    template<typename Pred_, typename... Args_>
-    static inline constexpr
-    std::enable_if_t<std::is_same_v<bool, decltype(std::declval<Pred_>()(std::declval<Args_>()...))>, std::true_type>
-    can_call(int);
+  template<typename...>
+  static std::false_type can_call(...);
 
-    template<typename...>
-    static inline constexpr
-    std::false_type can_call(...);
+  template<typename Pred_, typename... Args_>
+  static std::enable_if_t<
+    std::is_same_v<bool, std::invoke_result_t<Pred_, Args_...>>,
+    std::true_type>
+  can_call(int);
 
 public:
     using type = decltype(can_call<Pred, Args...>(0));
