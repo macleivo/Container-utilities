@@ -5,7 +5,7 @@
 #include "containerutils.h"
 #include "helpers.h"
 
-TEST_CASE( "test_enumerate()", "container utils" ) {
+TEST_CASE("test_enumerate()", "container utils") {
     {
         auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
         for (auto&& [i, e] : mleivo::cu::enumerate(test)) {
@@ -51,7 +51,7 @@ TEST_CASE( "test_enumerate()", "container utils" ) {
     }
 }
 
-TEST_CASE( "test_remove_all()" , "[container utils]" ) {
+TEST_CASE("test_remove_all()", "[container utils]") {
     {
         std::vector<int> v{1, 2, 1, 2, 1};
         mleivo::cu::remove_all(v, 1);
@@ -66,7 +66,7 @@ TEST_CASE( "test_remove_all()" , "[container utils]" ) {
     }
 }
 
-TEST_CASE( "test_move_to_index()" , "[container utils]" ) {
+TEST_CASE("test_move_to_index()", "[container utils]") {
     {
         std::vector<int> v{3, 1, 2, 0};
         mleivo::cu::move_to_index(v, 3, 0);
@@ -80,7 +80,7 @@ TEST_CASE( "test_move_to_index()" , "[container utils]" ) {
     }
 }
 
-TEST_CASE( "test_pop_front()" , "[container utils]" ) {
+TEST_CASE("test_pop_front()", "[container utils]") {
     {
         std::vector<int> v{0, 1, 2};
         mleivo::cu::pop_front(v);
@@ -96,14 +96,15 @@ TEST_CASE( "test_pop_front()" , "[container utils]" ) {
     }
 }
 
-TEST_CASE( "test_static_cast_all()" , "[container utils]" ) {
+TEST_CASE("test_static_cast_all()", "[container utils]") {
     {
         auto v = std::vector<double>{0, 1, 2};
         auto ints = mleivo::cu::static_cast_all<int>(v);
         static_assert(std::is_same_v<decltype(ints), std::vector<int>>);
         REQUIRE(3 == ints.size());
         for (int i = 0; i < ints.size(); ++i) {
-            REQUIRE(i == ints[i]);;
+            REQUIRE(i == ints[i]);
+            ;
         }
     }
     {
@@ -155,7 +156,7 @@ TEST_CASE( "test_static_cast_all()" , "[container utils]" ) {
     }
 }
 
-TEST_CASE( "test_contains()", "container utils" ) {
+TEST_CASE("test_contains()", "container utils") {
     struct wrapper : public std::vector<int> {
         bool contains(int i) const {
             return std::find(std::cbegin(*this), std::cend(*this), i) != std::cend(*this);
@@ -196,7 +197,7 @@ TEST_CASE( "test_contains()", "container utils" ) {
     }
 }
 
-TEST_CASE( "test_merge()", "container utils" ) {
+TEST_CASE("test_merge()", "container utils") {
     {
         std::vector<int> v1{0, 1};
         std::set<int> v2{2, 3};
@@ -248,7 +249,7 @@ TEST_CASE( "test_merge()", "container utils" ) {
     }
 }
 
-TEST_CASE( "test_filter()", "container utils" ) {
+TEST_CASE("test_filter()", "container utils") {
     {
         auto ms = std::multiset<int>{0, 1, 2, 3, 4, 5};
         auto even = mleivo::cu::filter(ms, [](const auto& i) { return i % 2 == 0; });
@@ -290,7 +291,7 @@ TEST_CASE( "test_filter()", "container utils" ) {
     }
 }
 
-TEST_CASE( "test_split()", "container utils" ) {
+TEST_CASE("test_split()", "container utils") {
     {
         auto v = std::vector<int>{0, -1, 1, -1, 2, -1, 3, -1, 4, -1, 5};
         auto out = mleivo::cu::split(v, -1);
@@ -363,7 +364,7 @@ TEST_CASE( "test_split()", "container utils" ) {
     }
 }
 
-TEST_CASE( "test_to_std_vector()", "container utils" ) {
+TEST_CASE("test_to_std_vector()", "container utils") {
     {
         auto ms = std::multiset<int>{0, 1, 2, 3, 4, 5};
         auto v = mleivo::cu::to_std_vector(ms);
@@ -426,13 +427,13 @@ TEST_CASE( "test_to_std_vector()", "container utils" ) {
     }
 }
 
-TEST_CASE( "test_compile_time_map()", "container utils" ) {
+TEST_CASE("test_compile_time_map()", "container utils") {
     using my_type_map = mleivo::type_traits::type_map<int, char, double, float>;
     static_assert(std::is_same_v<my_type_map::value<int>, char>);
     //    static_assert(std::is_same_v<my_type_map::value<bool>, char>);
 }
 
-TEST_CASE( "test_transform()", "container utils" ) {
+TEST_CASE("test_transform()", "container utils") {
     {
         auto in = std::vector<move_only_type>{};
         in.emplace_back(0);
@@ -481,7 +482,7 @@ TEST_CASE( "test_transform()", "container utils" ) {
     }
 }
 
-TEST_CASE( "test_cont()", "container utils" ) {
+TEST_CASE("test_cont()", "container utils") {
     /* TODO
     Cont asd;
     for (auto& [index, ptr] : asd)
@@ -497,7 +498,7 @@ TEST_CASE( "test_cont()", "container utils" ) {
     */
 }
 
-TEST_CASE( "test_all_of()", "container utils" ) {
+TEST_CASE("test_all_of()", "container utils") {
     std::set<int> s{1, 3, 5};
     REQUIRE(true == mleivo::cu::all_of(s, [](int i) { return i % 2; }));
 
@@ -505,7 +506,7 @@ TEST_CASE( "test_all_of()", "container utils" ) {
     REQUIRE(false == mleivo::cu::all_of(s, [](int i) { return i % 2; }));
 }
 
-TEST_CASE( "test_any_of()", "container utils" ) {
+TEST_CASE("test_any_of()", "container utils") {
     std::set<int> s{1, 3, 5};
     REQUIRE(true == mleivo::cu::any_of(s, [](int i) { return i % 2; }));
 
@@ -515,7 +516,7 @@ TEST_CASE( "test_any_of()", "container utils" ) {
     REQUIRE(false == mleivo::cu::any_of(s, [](int i) { return i > 5; }));
 }
 
-TEST_CASE( "test_remove_duplicates()", "container utils" ) {
+TEST_CASE("test_remove_duplicates()", "container utils") {
     std::vector<int> v{0, 1, 0, 1, 2, 2, 2, 3, 2, 2};
     mleivo::cu::remove_duplicates(v);
     REQUIRE(4 == v.size());
@@ -524,7 +525,7 @@ TEST_CASE( "test_remove_duplicates()", "container utils" ) {
     }
 }
 
-TEST_CASE( "test_index_of()", "container utils" ) {
+TEST_CASE("test_index_of()", "container utils") {
     {
         auto v = std::vector<int>{0, 1, 2, 3, 4, 5};
         for (int i = 0; i < v.size(); ++i) {
@@ -541,15 +542,14 @@ TEST_CASE( "test_index_of()", "container utils" ) {
     }
 }
 
-TEST_CASE( "test_irange()", "container utils") {
+TEST_CASE("test_irange()", "container utils") {
     {
         auto a = int{0};
         auto b = int{10};
         auto step = int{3};
         auto v = mleivo::cu::irange(a, b, step);
         auto ans = a;
-        for (auto i : v)
-        {
+        for (auto i : v) {
             REQUIRE(ans == i);
             ans += step;
         }
@@ -560,8 +560,7 @@ TEST_CASE( "test_irange()", "container utils") {
         auto step = int{-1};
         auto v = mleivo::cu::irange(a, b, step);
         auto ans = a;
-        for (auto i : v)
-        {
+        for (auto i : v) {
             REQUIRE(ans == i);
             ans += step;
         }
@@ -572,8 +571,7 @@ TEST_CASE( "test_irange()", "container utils") {
         auto step = int{-3};
         auto v = mleivo::cu::irange(a, b, step);
         auto ans = a;
-        for (auto i : v)
-        {
+        for (auto i : v) {
             REQUIRE(ans == i);
             ans += step;
         }
@@ -584,8 +582,7 @@ TEST_CASE( "test_irange()", "container utils") {
         auto step = int{-3};
         auto v = mleivo::cu::irange(a, b, step);
         auto ans = a;
-        for (auto i : v)
-        {
+        for (auto i : v) {
             REQUIRE(ans == i);
             ans += step;
         }

@@ -254,48 +254,48 @@ auto index_of(const ContainerT& container, T&& predOrItem) {
                              std::find_if(cbegin(container), cend(container), std::forward<T>(predOrItem)));
 }
 
-namespace
-{
-namespace irange_lazy_impl{
-template<typename T, bool IsUnsigned = std::is_unsigned_v<T>>
+namespace { namespace irange_lazy_impl {
+template <typename T, bool IsUnsigned = std::is_unsigned_v<T>>
 struct IRangeLazyIter {
     T m_value;
     const T m_step;
     const T m_sign = m_step < T{} ? static_cast<T>(-1) : static_cast<T>(1);
 
-    void operator++() { m_value += m_step; };
-    auto operator*() const noexcept { return m_value; }
+    void operator++() {
+        m_value += m_step;
+    };
+    auto operator*() const noexcept {
+        return m_value;
+    }
 
-    template<bool X = IsUnsigned>
-    bool operator!=(const IRangeLazyIter& rhs) const  noexcept {
-        if constexpr(X)
-        {
+    template <bool X = IsUnsigned>
+    bool operator!=(const IRangeLazyIter& rhs) const noexcept {
+        if constexpr (X) {
             return *(*this) < *rhs;
-        }
-        else
-        {
+        } else {
             return m_sign * *(*this) < m_sign * *rhs;
         }
     }
 };
 
-template<typename T>
-struct IRangeLazy
-{
+template <typename T>
+struct IRangeLazy {
     const T m_a;
     const T m_b;
     const T m_step;
 
-    auto begin() const { return IRangeLazyIter<T>{m_a, m_step}; }
-    auto end() const { return IRangeLazyIter<T>{m_b, m_step}; }
+    auto begin() const {
+        return IRangeLazyIter<T>{m_a, m_step};
+    }
+    auto end() const {
+        return IRangeLazyIter<T>{m_b, m_step};
+    }
 };
-}
-}
+}} // namespace ::irange_lazy_impl
 
-template<typename I, typename = std::enable_if_t<std::is_integral_v<I>>>
-auto irange(const I& a, const I& b, const I& step)
-{
-    return irange_lazy_impl::IRangeLazy<I>{a,b,step};
+template <typename I, typename = std::enable_if_t<std::is_integral_v<I>>>
+auto irange(const I& a, const I& b, const I& step) {
+    return irange_lazy_impl::IRangeLazy<I>{a, b, step};
 }
 
 // pop_front
