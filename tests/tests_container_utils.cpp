@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <deque>
 #include <set>
+#include <type_traits>
 
 #include "containerutils.h"
 #include "helpers.h"
@@ -35,6 +36,24 @@ TEST_CASE("test_Enumerate()", "container utils") {
 
         for (auto i = 0; i < test.size(); ++i)
             REQUIRE(test.at(i) == 'a' + i);
+    }
+    {
+        const auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto&& [i, e] : mleivo::cu::Enumerate{test}) {
+            REQUIRE(e == 'a' + i);
+        }
+    }
+    {
+        const auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto& [i, e] : mleivo::cu::Enumerate{test}) {
+            REQUIRE(e == 'a' + i);
+        }
+    }
+    {
+        const auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto [i, e] : mleivo::cu::Enumerate{test}) {
+            REQUIRE(e == 'a' + i);
+        }
     }
     {
         for (auto&& [i, e] : mleivo::cu::Enumerate{std::vector<char>{'a', 'b', 'c', 'd', 'e'}}) {
@@ -81,6 +100,24 @@ TEST_CASE("test_enumerate()", "container utils") {
 
         for (auto i = 0; i < test.size(); ++i)
             REQUIRE(test.at(i) == 'a' + i);
+    }
+    {
+        const auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto&& [i, e] : mleivo::cu::enumerate(test)) {
+            REQUIRE(e == 'a' + i);
+        }
+    }
+    {
+        const auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto& [i, e] : mleivo::cu::enumerate(test)) {
+            REQUIRE(e == 'a' + i);
+        }
+    }
+    {
+        const auto test = std::vector<char>{'a', 'b', 'c', 'd', 'e'};
+        for (auto [i, e] : mleivo::cu::enumerate(test)) {
+            REQUIRE(e == 'a' + i);
+        }
     }
     {
         for (auto&& [i, e] : mleivo::cu::enumerate(std::vector<char>{'a', 'b', 'c', 'd', 'e'})) {

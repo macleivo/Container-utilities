@@ -151,13 +151,13 @@ struct Enumerate
         return detail::iter<decltype(it)>{size_t{m_size}, it};
     }
 
-    using T = std::conditional_t<std::is_rvalue_reference_v<ContainerT&&>, std::remove_cv_t<std::remove_reference_t<ContainerT>>, ContainerT&>;
+    using T = std::conditional_t<std::is_rvalue_reference_v<ContainerT>, std::remove_cv_t<std::remove_reference_t<ContainerT>>, ContainerT>;
     T m_container;
 
     decltype(detail::size_(m_container)) m_size = detail::size_(m_container);
 };
 template<typename ContainerT>
-Enumerate(ContainerT&&) -> Enumerate<ContainerT>;
+Enumerate(ContainerT&&) -> Enumerate<ContainerT&&>;
 
 template <typename ContainerT>
 auto enumerate(ContainerT&& v) {
