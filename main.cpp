@@ -85,6 +85,11 @@ struct VerboseIntVector {
     decltype(auto) operator[](size_t i) {
         return m_v[i];
     }
+
+    decltype(auto) operator[](size_t i) const {
+        return m_v[i];
+    }
+
     std::vector<int> m_v;
 };
 
@@ -683,11 +688,23 @@ void test_pipe_for_each() {
 }
 
 void test_pipe_for_each_verbose() {
-    auto f = [](int& i) { i += i; };
-    auto v = VerboseIntVector({0, 1, 2, 3}) | mleivo::pipes::for_each(f) | mleivo::pipes::for_each(f)
-             | mleivo::pipes::for_each(f);
-    for (int i = 0; i < v.size(); ++i) {
-        COMPARE(i * 8, v[i]);
+    {
+        auto f = [incr = 1](int& i) { i += incr; };
+        auto x = mleivo::pipes::for_each(std::move(f));
+        auto v = VerboseIntVector({0, 1, 2, 3}) | x | x | x;
+        for (int i = 0; i < v.size(); ++i) {
+            COMPARE(i + 3, v[i]);
+        }
+    }
+    {
+        auto f = [incr = VerboseIntVector{1}](int& i) { i += incr[0]; };
+        auto x = mleivo::pipes::for_each(
+            f); // NB: do _not_ std::move(f) here! if move is used, f gets moved -> incr
+                // gets moved -> incr has size 0 in subsequent calls to x's operator() -> incr[0] is UB.
+        auto v = VerboseIntVector({0, 1, 2, 3}) | x | x | x;
+        for (int i = 0; i < v.size(); ++i) {
+            COMPARE(i + 3, v[i]);
+        }
     }
 }
 

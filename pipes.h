@@ -6,9 +6,6 @@
 #include <tuple>
 #include <vector>
 
-template <typename...>
-class TD;
-
 template <typename ContainerT, typename CallablePipeT,
           typename = decltype(std::declval<CallablePipeT>()(std::declval<ContainerT>()))>
 inline decltype(auto) constexpr operator|(ContainerT&& container, CallablePipeT&& f);
