@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <utility>
 
+#include <tuple>
 #include <vector>
 
 template <typename...>
@@ -10,7 +11,7 @@ class TD;
 
 template <typename ContainerT, typename CallablePipeT,
           typename = decltype(std::declval<CallablePipeT>()(std::declval<ContainerT>()))>
-auto operator|(ContainerT&& container, CallablePipeT&& f);
+inline decltype(auto) constexpr operator|(ContainerT&& container, CallablePipeT&& f);
 
 namespace mleivo::pipes {
 struct pipeable {
@@ -28,45 +29,40 @@ struct reverse : pipeable {
     }
 };
 
-template <typename UnaryFunction>
-struct for_each_impl : pipeable {
+struct for_each {
+    template <typename... Args>
+    static inline constexpr decltype(auto) call(Args&&... args) {
+        std::for_each(std::forward<decltype(args)>(args)...);
+    }
+};
+
+template <typename CallT, typename... Args>
+struct wrapper {
+    std::tuple<Args&&...> m_t;
+    wrapper(Args&&... args) : m_t(std::forward<Args>(args)...) {
+    }
+
     template <typename ContainerT>
-    constexpr auto operator()(ContainerT&& container) const {
-        using std::begin;
-        using std::end;
-        auto out = std::forward<ContainerT>(container);
-        std::for_each(begin(out), end(out), std::forward<UnaryFunction>(m_f));
-        return out;
+    inline constexpr decltype(auto) operator()(ContainerT&& container) {
+        std::apply(
+            [&](auto&&... args) {
+                using std::begin;
+                using std::end;
+                CallT::call(begin(container), end(container), std::forward<decltype(args)>(args)...);
+            },
+            m_t);
+        return std::forward<decltype(container)>(container);
     }
-
-private:
-    template <typename UnaryFunction_>
-    for_each_impl(UnaryFunction_&& f, std::enable_if_t<std::is_same_v<UnaryFunction, decltype(f)>, int> = 0)
-        : m_f(std::forward<decltype(f)>(f)) {
-    }
-
-    UnaryFunction m_f;
-    template <typename UnaryFunction_>
-    friend auto for_each(UnaryFunction_&& f);
-
-    template <typename ContainerT, typename CallablePipeT, typename>
-    friend auto operator|(ContainerT&& container, CallablePipeT&& f);
 };
 
 template <typename UnaryFunction>
-inline auto for_each(UnaryFunction&& f) {
-    return [&f](auto&& container) {
-        using std::begin;
-        using std::end;
-        auto out = std::forward<decltype(container)>(container);
-        std::for_each(begin(out), end(out), std::forward<decltype(f)>(f));
-        return out;
-    };
+inline constexpr decltype(auto) for_each(UnaryFunction&& f) {
+    return wrapper<struct for_each, decltype(f)>{std::forward<decltype(f)>(f)};
 };
 
 } // namespace mleivo::pipes
 
 template <typename ContainerT, typename CallablePipeT, typename>
-auto operator|(ContainerT&& container, CallablePipeT&& f) {
+inline decltype(auto) constexpr operator|(ContainerT&& container, CallablePipeT&& f) {
     return f(std::forward<ContainerT>(container));
 }

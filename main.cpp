@@ -17,8 +17,76 @@
 #include <bits/stdc++.h>
 
 #include "containerutils.h"
-#include "enumerate.h"
 #include "pipes.h"
+
+#include <iostream>
+
+struct VerboseIntVector {
+    VerboseIntVector(std::vector<int> v = {}) : m_v(std::move(v)) {
+        std::cout << "ctor verbose vector...\n";
+    };
+    ~VerboseIntVector() {
+        std::cout << "dtor verbose vector...\n";
+    }
+    VerboseIntVector(const VerboseIntVector& rhs) : m_v(rhs.m_v) {
+        std::cout << "copy ctor verbose vector...\n";
+    }
+    VerboseIntVector& operator=(const VerboseIntVector& rhs) {
+        std::cout << "copy ass verbose vector...\n";
+        auto tmp = rhs;
+        tmp.swap(*this);
+        return *this;
+    }
+    VerboseIntVector(VerboseIntVector&& rhs) noexcept : m_v(std::move(rhs.m_v)) {
+        std::cout << "move ctor verbose vector...\n";
+    }
+    VerboseIntVector& operator=(VerboseIntVector&& rhs) noexcept {
+        std::cout << "move ass verbose vector...\n";
+        auto tmp = std::move(rhs);
+        tmp.swap(*this);
+        return *this;
+    }
+
+    friend void swap(VerboseIntVector& lhs, VerboseIntVector& rhs) {
+        lhs.swap(rhs);
+    }
+
+    void swap(VerboseIntVector& rhs) {
+        using std::swap;
+        swap(m_v, rhs.m_v);
+    }
+
+    auto size() const {
+        return m_v.size();
+    }
+
+    auto begin() {
+        return m_v.begin();
+    }
+    auto end() {
+        return m_v.end();
+    }
+
+    auto begin() const {
+        return m_v.begin();
+    }
+    auto end() const {
+        return m_v.end();
+    }
+
+    auto cbegin() const {
+        return m_v.cbegin();
+    }
+
+    auto cend() const {
+        return m_v.cend();
+    }
+
+    decltype(auto) operator[](size_t i) {
+        return m_v[i];
+    }
+    std::vector<int> m_v;
+};
 
 auto g_ret_val = int{0};
 
@@ -593,10 +661,28 @@ void test_pipe_reverse() {
 }
 
 void test_pipe_for_each() {
-    auto square = [](int& i) { i *= i; };
-    auto v = std::vector<int>{0, 1, 2, 3} | mleivo::pipes::for_each(square);
+    {
+        auto square = [](int& i) { i *= i; };
+        auto v = std::vector<int>{0, 1, 2, 3} | mleivo::pipes::for_each(square);
+        for (int i = 0; i < v.size(); ++i) {
+            COMPARE(i * i, v[i]);
+        }
+    }
+    {
+        auto square = [](int& i) { i *= i; };
+        auto w = std::vector<int>{0, 1, 2, 3};
+        auto v = w | mleivo::pipes::for_each(square);
+        for (int i = 0; i < v.size(); ++i) {
+            COMPARE(i * i, w[i]);
+        }
+    }
+}
+
+void test_pipe_for_each_verbose() {
+    auto v = VerboseIntVector(std::vector<int>{0, 1, 2, 3}) | mleivo::pipes::for_each([](int& i) { i += i; })
+             | mleivo::pipes::for_each([](int& i) { i += i; }) | mleivo::pipes::for_each([](int& i) { i += i; });
     for (int i = 0; i < v.size(); ++i) {
-        COMPARE(i * i, v[i]);
+        COMPARE(i * 8, v[i]);
     }
 }
 
@@ -619,5 +705,6 @@ int main() {
     test_index_of();
     test_pipe_reverse();
     test_pipe_for_each();
+    test_pipe_for_each_verbose();
     return g_ret_val;
 }
