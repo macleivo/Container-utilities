@@ -654,7 +654,7 @@ void test_index_of() {
 }
 
 void test_pipe_reverse() {
-    auto v = std::vector<int>{3, 2, 1, 0} | mleivo::pipes::reverse{};
+    auto v = std::vector<int>{3, 2, 1, 0} | mleivo::pipes::reverse();
     for (int i = 0; i < v.size(); ++i) {
         COMPARE(i, v[i]);
     }
@@ -686,6 +686,13 @@ void test_pipe_for_each_verbose() {
     }
 }
 
+void test_pipe_sort() {
+    auto v = std::vector<int>{3, 1, 2, 0} | mleivo::pipes::sort();
+    for (int i = 0; i < v.size(); ++i) {
+        COMPARE(i, v[i]);
+    }
+}
+
 int main() {
     test_merge();
     test_filter();
@@ -706,5 +713,6 @@ int main() {
     test_pipe_reverse();
     test_pipe_for_each();
     test_pipe_for_each_verbose();
+    test_pipe_sort();
     return g_ret_val;
 }

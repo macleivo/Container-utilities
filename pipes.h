@@ -14,28 +14,8 @@ template <typename ContainerT, typename CallablePipeT,
 inline decltype(auto) constexpr operator|(ContainerT&& container, CallablePipeT&& f);
 
 namespace mleivo::pipes {
-struct pipeable {
-    using is_pipeable = std::true_type;
-};
 
-struct reverse : pipeable {
-    template <typename ContainerT>
-    constexpr auto operator()(ContainerT&& container) const {
-        using std::begin;
-        using std::end;
-        auto out = std::forward<ContainerT>(container);
-        std::reverse(begin(out), end(out));
-        return out;
-    }
-};
-
-struct for_each {
-    template <typename... Args>
-    static inline constexpr decltype(auto) call(Args&&... args) {
-        std::for_each(std::forward<decltype(args)>(args)...);
-    }
-};
-
+namespace {
 template <typename CallT, typename... Args>
 struct wrapper {
     std::tuple<Args&&...> m_t;
@@ -54,11 +34,27 @@ struct wrapper {
         return std::forward<decltype(container)>(container);
     }
 };
+} // namespace
 
-template <typename UnaryFunction>
-inline constexpr decltype(auto) for_each(UnaryFunction&& f) {
-    return wrapper<struct for_each, decltype(f)>{std::forward<decltype(f)>(f)};
-};
+#define MLEIVO_STL_WRAPPER(FUNCTION_NAME)                                                                              \
+    namespace {                                                                                                        \
+    struct FUNCTION_NAME {                                                                                             \
+        template <typename... Args>                                                                                    \
+        static inline constexpr decltype(auto) call(Args&&... args) {                                                  \
+            std::FUNCTION_NAME(std::forward<decltype(args)>(args)...);                                                 \
+        }                                                                                                              \
+    };                                                                                                                 \
+    }                                                                                                                  \
+                                                                                                                       \
+    template <typename... Args>                                                                                        \
+    inline constexpr decltype(auto) FUNCTION_NAME(Args&&... args) {                                                    \
+        return wrapper<struct FUNCTION_NAME, decltype(args)...>{std::forward<decltype(args)>(args)...};                \
+    };
+
+MLEIVO_STL_WRAPPER(for_each);
+MLEIVO_STL_WRAPPER(reverse);
+MLEIVO_STL_WRAPPER(sort);
+#undef MLEIVO_STL_WRAPPER
 
 } // namespace mleivo::pipes
 
