@@ -74,18 +74,29 @@ CONTAINER_UTILS_HAS_METHOD(push_back, void, std::declval<value_type<ContainerT>>
 #undef RETURN_TYPE
 #undef CONTAINER_UTILS_HAS_METHOD
 
-
-template<typename Pred, typename Arg, typename = void>
-struct is_unary_predicate : std::false_type{};
-
-template<typename Pred, typename Arg>
-struct is_unary_predicate<Pred, Arg, std::void_t<decltype(std::declval<Pred>()(std::declval<Arg>()))>> :
-std::bool_constant<std::is_same_v<bool, decltype(std::declval<Pred>()(std::declval<Arg>()))>>
+template<typename Pred, typename... Args>
+inline constexpr std::enable_if<
+    std::is_same_v<bool, decltype(std::declval<Pred>()(std::declval<Args>()...))>,
+  bool>
+helper()
 {
-};
+    return true;
+}
+
+template<typename Pred, typename... Args>
+inline constexpr
+std::enable_if_t<std::is_same_v<bool, decltype(std::declval<Pred>()(std::declval<Args>()...))>, std::true_type>
+helper(int);
+
+template<typename...>
+inline constexpr
+std::false_type helper(...);
+
+template<typename Pred, typename... Args>
+struct is_predicate : decltype(helper<Pred, Args...>(0)) {};
 
 template<typename Pred, typename Arg>
-inline constexpr bool is_unary_predicate_v = is_unary_predicate<Pred, Arg>::value;
+inline constexpr bool is_unary_predicate_v = is_predicate<Pred, Arg>::value;
 
 // value_types_are_equal
 template<typename ContainerT1, typename... ContainerT2ToN>

@@ -503,6 +503,9 @@ void test_remove_duplicates()
     }
 }
 
+template<typename...>
+class TD;
+
 void test_remove_all()
 {
     {
