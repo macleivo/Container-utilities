@@ -19,6 +19,7 @@
 #include "type_traits.h"
 
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <vector>
 
@@ -26,7 +27,8 @@ namespace mleivo::cu {
 using ::mleivo::type_traits::value_type;
 
 namespace detail {
-template <typename To, typename From> auto static_cast_all_default_imp(const From& from) {
+template <typename To, typename From>
+auto static_cast_all_default_imp(const From& from) {
     using std::cbegin;
     using std::cend;
     To out;
@@ -36,7 +38,8 @@ template <typename To, typename From> auto static_cast_all_default_imp(const Fro
 }
 } // namespace detail
 
-template <typename ContainerT> std::vector<value_type<ContainerT>> to_std_vector(ContainerT&& c);
+template <typename ContainerT>
+std::vector<value_type<ContainerT>> to_std_vector(ContainerT&& c);
 
 // all_of
 template <typename ContainerT, typename UnaryPredicate>
@@ -60,7 +63,8 @@ auto static_cast_all(const ContainerT<ValueT, ContainerTArgs...>& container) {
     return detail::static_cast_all_default_imp<ContainerT<T>>(container);
 }
 
-template <typename OutT, typename InT, size_t N> auto static_cast_all(const InT (&container)[N]) {
+template <typename OutT, typename InT, size_t N>
+auto static_cast_all(const InT (&container)[N]) {
     using std::back_inserter;
     using std::begin;
     using std::end;
@@ -85,7 +89,8 @@ auto static_cast_all(const ContainerT& container) {
 }
 
 // contains
-template <typename ContainerT, typename ValueT> bool contains(const ContainerT& c, const ValueT& value) {
+template <typename ContainerT, typename ValueT>
+bool contains(const ContainerT& c, const ValueT& value) {
     if constexpr (mleivo::type_traits::has_method_contains_v<ContainerT>) {
         return c.contains(value);
     } else if constexpr (mleivo::type_traits::has_method_count_v<ContainerT>) {
@@ -96,7 +101,8 @@ template <typename ContainerT, typename ValueT> bool contains(const ContainerT& 
 }
 
 // filter
-template <typename ContainerT, typename Filter> std::vector<value_type<ContainerT>> filter(ContainerT&& c, Filter&& f) {
+template <typename ContainerT, typename Filter>
+std::vector<value_type<ContainerT>> filter(ContainerT&& c, Filter&& f) {
     std::vector<value_type<decltype(c)>> v;
     if constexpr (std::is_rvalue_reference_v<decltype(c)> && std::is_move_constructible_v<value_type<decltype(c)>>) {
         std::copy_if(std::make_move_iterator(std::begin(c)), std::make_move_iterator(std::end(c)),
@@ -108,7 +114,8 @@ template <typename ContainerT, typename Filter> std::vector<value_type<Container
 }
 
 // merge
-template <typename ContainerT> std::vector<value_type<ContainerT>> merge(ContainerT&& c) {
+template <typename ContainerT>
+std::vector<value_type<ContainerT>> merge(ContainerT&& c) {
     return to_std_vector(std::forward<ContainerT>(c));
 }
 
@@ -143,7 +150,8 @@ void move_to_index(ContainerT& container, typename std::decay_t<ContainerT>::dif
 }
 
 // index_of
-template <typename ContainerT, typename T> auto index_of(const ContainerT& container, T&& predOrItem) {
+template <typename ContainerT, typename T>
+auto index_of(const ContainerT& container, T&& predOrItem) {
     using std::cbegin;
     using std::cend;
     if constexpr (std::is_same_v<value_type<ContainerT>, std::decay_t<T>>)
@@ -154,14 +162,16 @@ template <typename ContainerT, typename T> auto index_of(const ContainerT& conta
 }
 
 // pop_front
-template <typename ContainerT> void pop_front(ContainerT& v) {
+template <typename ContainerT>
+void pop_front(ContainerT& v) {
     using std::begin;
     assert(!v.empty());
     v.erase(begin(v));
 }
 
 // remove_all
-template <typename ContainerT, typename T> void remove_all(ContainerT& container, T&& predOrItem) {
+template <typename ContainerT, typename T>
+void remove_all(ContainerT& container, T&& predOrItem) {
     using std::begin;
     using std::end;
     if constexpr (mleivo::type_traits::is_unary_predicate_v<decltype(predOrItem), value_type<ContainerT>>)
@@ -186,8 +196,18 @@ void remove_duplicates(ContainerT& container, const EqualityCmp& cmp) {
     }
 }
 
-template <typename ContainerT> void remove_duplicates(ContainerT& container) {
+template <typename ContainerT>
+void remove_duplicates(ContainerT& container) {
     remove_duplicates(container, std::equal_to{});
+}
+
+template <typename ContainerT>
+auto reverse(ContainerT&& container) {
+    using std::begin;
+    using std::end;
+    auto out = std::forward<ContainerT>(container);
+    std::reverse(begin(out), end(out));
+    return out;
 }
 
 template <typename ContainerT>
@@ -212,7 +232,8 @@ std::vector<std::decay_t<ContainerT>> split(ContainerT&& c, const value_type<Con
 }
 
 // transform
-template <typename ContainerT, typename TransformerT> auto transform(ContainerT&& c, TransformerT&& t) {
+template <typename ContainerT, typename TransformerT>
+auto transform(ContainerT&& c, TransformerT&& t) {
     using t_ret_val = decltype(std::declval<TransformerT>()(std::declval<value_type<ContainerT>>()));
     std::conditional_t<std::is_same_v<value_type<ContainerT>, t_ret_val>, std::decay_t<ContainerT>,
                        std::vector<t_ret_val>>
@@ -230,7 +251,8 @@ template <typename ContainerT, typename TransformerT> auto transform(ContainerT&
 }
 
 // to_std_vector
-template <typename ContainerT> std::vector<value_type<ContainerT>> to_std_vector(ContainerT&& c) {
+template <typename ContainerT>
+std::vector<value_type<ContainerT>> to_std_vector(ContainerT&& c) {
     std::vector<value_type<ContainerT>> out;
     if constexpr (std::is_rvalue_reference_v<decltype(c)> && std::is_move_constructible_v<value_type<decltype(c)>>) {
         out.insert(out.end(), std::make_move_iterator(std::begin(c)), std::make_move_iterator(std::end(c)));

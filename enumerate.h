@@ -123,28 +123,32 @@ private:
     int m_array[5] = {1, 1, 1, 1, 1};
 };
 
-template <size_t index> std::tuple_element_t<index, Cont::asd>& get(Cont::asd& asd) {
+template <size_t index>
+std::tuple_element_t<index, Cont::asd>& get(Cont::asd& asd) {
     if constexpr (index == 0)
         return asd.m_i;
     if constexpr (index == 1)
         return *asd.m_ptr;
 }
 
-template <size_t index> std::tuple_element_t<index, Cont::asd>& get(const Cont::asd& asd) {
+template <size_t index>
+std::tuple_element_t<index, Cont::asd>& get(const Cont::asd& asd) {
     if constexpr (index == 0)
         return asd.m_i;
     if constexpr (index == 1)
         return *asd.m_ptr;
 }
 
-template <size_t index> std::tuple_element_t<index, Cont::constAsd>& get(Cont::constAsd& asd) {
+template <size_t index>
+std::tuple_element_t<index, Cont::constAsd>& get(Cont::constAsd& asd) {
     if constexpr (index == 0)
         return asd.m_i;
     if constexpr (index == 1)
         return *asd.m_ptr;
 }
 
-template <size_t index> std::tuple_element_t<index, Cont::constAsd>& get(const Cont::constAsd& asd) {
+template <size_t index>
+std::tuple_element_t<index, Cont::constAsd>& get(const Cont::constAsd& asd) {
     if constexpr (index == 0)
         return asd.m_i;
     if constexpr (index == 1)
@@ -152,23 +156,29 @@ template <size_t index> std::tuple_element_t<index, Cont::constAsd>& get(const C
 }
 
 namespace std {
-template <> struct tuple_size<::Cont::asd> {
+template <>
+struct tuple_size<::Cont::asd> {
     static inline constexpr size_t value = 2;
 };
-template <> struct tuple_element<0, ::Cont::asd> {
+template <>
+struct tuple_element<0, ::Cont::asd> {
     using type = size_t;
 };
-template <> struct tuple_element<1, ::Cont::asd> {
+template <>
+struct tuple_element<1, ::Cont::asd> {
     using type = int&;
 };
 
-template <> struct tuple_size<::Cont::constAsd> {
+template <>
+struct tuple_size<::Cont::constAsd> {
     static inline constexpr size_t value = 2;
 };
-template <> struct tuple_element<0, ::Cont::constAsd> {
+template <>
+struct tuple_element<0, ::Cont::constAsd> {
     using type = const size_t;
 };
-template <> struct tuple_element<1, ::Cont::constAsd> {
+template <>
+struct tuple_element<1, ::Cont::constAsd> {
     using type = const int&;
 };
 } // namespace std

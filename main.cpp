@@ -18,6 +18,7 @@
 
 #include "containerutils.h"
 #include "enumerate.h"
+#include "pipes.h"
 
 auto g_ret_val = int{0};
 
@@ -27,7 +28,8 @@ auto g_ret_val = int{0};
         g_ret_val = 1;                                                                                                 \
     }
 
-template <typename ContainerT1, typename ContainerT2> bool cmp(const ContainerT1& c1, const ContainerT2& c2) {
+template <typename ContainerT1, typename ContainerT2>
+bool cmp(const ContainerT1& c1, const ContainerT2& c2) {
     if (c1.size() != c2.size())
         return false;
     for (size_t i = 0; i < c1.size(); ++i) {
@@ -463,7 +465,8 @@ void test_remove_duplicates() {
     }
 }
 
-template <typename...> class TD;
+template <typename...>
+class TD;
 
 void test_remove_all() {
     {
@@ -582,6 +585,21 @@ void test_index_of() {
     }
 }
 
+void test_pipe_reverse() {
+    auto v = std::vector<int>{3, 2, 1, 0} | mleivo::pipes::reverse{};
+    for (int i = 0; i < v.size(); ++i) {
+        COMPARE(i, v[i]);
+    }
+}
+
+void test_pipe_for_each() {
+    auto square = [](int& i) { i *= i; };
+    auto v = std::vector<int>{0, 1, 2, 3} | mleivo::pipes::for_each(square);
+    for (int i = 0; i < v.size(); ++i) {
+        COMPARE(i * i, v[i]);
+    }
+}
+
 int main() {
     test_merge();
     test_filter();
@@ -599,5 +617,7 @@ int main() {
     test_pop_front();
     test_static_cast_all();
     test_index_of();
+    test_pipe_reverse();
+    test_pipe_for_each();
     return g_ret_val;
 }
