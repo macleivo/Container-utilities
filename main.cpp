@@ -77,8 +77,8 @@ void test_contains()
 
     {
         auto s = std::set<int> { 0, 1, 2, 3 };
-        COMPARE(true, cu::contains(s, 0));
-        COMPARE(false, cu::contains(s, -1));
+        COMPARE(true, mleivo::cu::contains(s, 0));
+        COMPARE(false, mleivo::cu::contains(s, -1));
     }
 
     {
@@ -86,14 +86,14 @@ void test_contains()
         w.emplace_back(0);
         w.emplace_back(1);
         w.emplace_back(2);
-        COMPARE(true, cu::contains(w, 0));
-        COMPARE(false, cu::contains(w, -1));
+        COMPARE(true, mleivo::cu::contains(w, 0));
+        COMPARE(false, mleivo::cu::contains(w, -1));
     }
 
     {
         auto v = std::vector<int> { 0, 1, 2, 3, 4 };
-        COMPARE(true, cu::contains(v, 0));
-        COMPARE(false, cu::contains(v, -1));
+        COMPARE(true, mleivo::cu::contains(v, 0));
+        COMPARE(false, mleivo::cu::contains(v, -1));
     }
 }
 
@@ -106,7 +106,7 @@ void test_merge()
         std::set<int> v2 { 2, 3 };
         std::deque<int> v3 { 4, 5 };
 
-        const auto merged = cu::merge(v1, v2, v3);
+        const auto merged = mleivo::cu::merge(v1, v2, v3);
         COMPARE(merged.size(), 6);
         for (int i = 0; i < merged.size(); i++)
         {
@@ -126,7 +126,7 @@ void test_merge()
         v3.emplace_back(4);
         v3.emplace_back(5);
 
-        const auto merged = cu::merge(std::move(v1), std::move(v2), std::move(v3));
+        const auto merged = mleivo::cu::merge(std::move(v1), std::move(v2), std::move(v3));
         COMPARE(merged.size(), 6);
         for (int i = 0; i < merged.size(); i++)
         {
@@ -146,7 +146,7 @@ void test_merge()
         v3.emplace_back(4);
         v3.emplace_back(5);
 
-        const auto merged = cu::merge(std::move(v1), std::move(v2), std::move(v3));
+        const auto merged = mleivo::cu::merge(std::move(v1), std::move(v2), std::move(v3));
         COMPARE(merged.size(), 6);
         for (int i = 0; i < merged.size(); i++)
         {
@@ -159,7 +159,7 @@ void test_filter()
 {
     {
         auto ms = std::multiset<int> { 0, 1, 2, 3, 4, 5 };
-        auto even = cu::filter(ms, [](const auto& i) { return i % 2 == 0; });
+        auto even = mleivo::cu::filter(ms, [](const auto& i) { return i % 2 == 0; });
         COMPARE(even.size(), 3);
         for (int i = 0; i < even.size(); i++)
         {
@@ -175,7 +175,7 @@ void test_filter()
         v.emplace_back(2);
         v.emplace_back(1);
         v.emplace_back(0);
-        auto even = cu::filter(std::move(v), [](const auto& i) { return *i.m_val % 2 == 0; });
+        auto even = mleivo::cu::filter(std::move(v), [](const auto& i) { return *i.m_val % 2 == 0; });
         COMPARE(even.size(), 3);
         std::sort(even.begin(), even.end());
         for (int i = 0; i < even.size(); i++)
@@ -192,7 +192,7 @@ void test_filter()
         v.emplace_back(3);
         v.emplace_back(4);
         v.emplace_back(5);
-        auto even = cu::filter(std::move(v), [](const auto& i) { return i.m_val % 2 == 0; });
+        auto even = mleivo::cu::filter(std::move(v), [](const auto& i) { return i.m_val % 2 == 0; });
         COMPARE(even.size(), 3);
         for (int i = 0; i < even.size(); i++)
         {
@@ -205,7 +205,7 @@ void test_split()
 {
     {
         auto v = std::vector<int> { 0, -1, 1, -1, 2, -1, 3, -1, 4, -1, 5 };
-        auto out = cu::split(v, -1);
+        auto out = mleivo::cu::split(v, -1);
         COMPARE(out.size(), 6);
         for (int i = 0; i < out.size(); i++)
         {
@@ -216,7 +216,7 @@ void test_split()
 
     {
         auto v = std::vector<int> { 0, -1, 1, -1, 2, -1, 3, -1, 4, -1, 5 };
-        auto out = cu::split(std::move(v), -1);
+        auto out = mleivo::cu::split(std::move(v), -1);
         COMPARE(out.size(), 6);
         for (int i = 0; i < out.size(); i++)
         {
@@ -226,7 +226,7 @@ void test_split()
     }
 
     {
-        auto out = cu::split(std::vector<int> { 0, -1, 1, -1, 2, -1, 3, -1, 4, -1, 5 }, -1);
+        auto out = mleivo::cu::split(std::vector<int> { 0, -1, 1, -1, 2, -1, 3, -1, 4, -1, 5 }, -1);
         COMPARE(out.size(), 6);
         for (int i = 0; i < out.size(); i++)
         {
@@ -248,7 +248,7 @@ void test_split()
         v.emplace_back(4);
         v.emplace_back(-1);
         v.emplace_back(5);
-        auto out = cu::split(std::move(v), move_only_type(-1));
+        auto out = mleivo::cu::split(std::move(v), move_only_type(-1));
         COMPARE(out.size(), 6);
         for (int i = 0; i < out.size(); i++)
         {
@@ -270,7 +270,7 @@ void test_split()
         v.emplace_back(4);
         v.emplace_back(-1);
         v.emplace_back(5);
-        auto out = cu::split(std::move(v), copy_only_type(-1));
+        auto out = mleivo::cu::split(std::move(v), copy_only_type(-1));
         COMPARE(out.size(), 6);
         for (int i = 0; i < out.size(); i++)
         {
@@ -284,8 +284,8 @@ void test_to_std_vector()
 {
     {
         auto ms = std::multiset<int> { 0, 1, 2, 3, 4, 5 };
-        auto v = cu::to_std_vector(ms);
-        static_assert(std::is_same_v<decltype(v), std::vector<cu::value_type<decltype(ms)>>>);
+        auto v = mleivo::cu::to_std_vector(ms);
+        static_assert(std::is_same_v<decltype(v), std::vector<mleivo::cu::value_type<decltype(ms)>>>);
         for (int i = 0; i < v.size(); i++)
         {
             COMPARE(i, v[i]);
@@ -293,8 +293,8 @@ void test_to_std_vector()
     }
     {
         auto ms = std::multiset<int> { 0, 1, 2, 3, 4, 5 };
-        auto v = cu::to_std_vector(std::move(ms));
-        static_assert(std::is_same_v<decltype(v), std::vector<cu::value_type<decltype(ms)>>>);
+        auto v = mleivo::cu::to_std_vector(std::move(ms));
+        static_assert(std::is_same_v<decltype(v), std::vector<mleivo::cu::value_type<decltype(ms)>>>);
         for (int i = 0; i < v.size(); i++)
         {
             COMPARE(i, v[i]);
@@ -302,8 +302,8 @@ void test_to_std_vector()
     }
     {
         auto dq = std::deque<int> { 0, 1, 2, 3, 4, 5 };
-        auto v = cu::to_std_vector(dq);
-        static_assert(std::is_same_v<decltype(v), std::vector<cu::value_type<decltype(dq)>>>);
+        auto v = mleivo::cu::to_std_vector(dq);
+        static_assert(std::is_same_v<decltype(v), std::vector<mleivo::cu::value_type<decltype(dq)>>>);
         for (int i = 0; i < v.size(); i++)
         {
             COMPARE(i, v[i]);
@@ -311,8 +311,8 @@ void test_to_std_vector()
     }
     {
         auto dq = std::deque<int> { 0, 1, 2, 3, 4, 5 };
-        auto v = cu::to_std_vector(std::move(dq));
-        static_assert(std::is_same_v<decltype(v), std::vector<cu::value_type<decltype(dq)>>>);
+        auto v = mleivo::cu::to_std_vector(std::move(dq));
+        static_assert(std::is_same_v<decltype(v), std::vector<mleivo::cu::value_type<decltype(dq)>>>);
         for (int i = 0; i < v.size(); i++)
         {
             COMPARE(i, v[i]);
@@ -326,8 +326,8 @@ void test_to_std_vector()
         dq.emplace_back(3);
         dq.emplace_back(4);
         dq.emplace_back(5);
-        auto v = cu::to_std_vector(std::move(dq));
-        static_assert(std::is_same_v<decltype(v), std::vector<cu::value_type<decltype(dq)>>>);
+        auto v = mleivo::cu::to_std_vector(std::move(dq));
+        static_assert(std::is_same_v<decltype(v), std::vector<mleivo::cu::value_type<decltype(dq)>>>);
         for (int i = 0; i < v.size(); i++)
         {
             COMPARE(i, *v[i].m_val);
@@ -341,8 +341,8 @@ void test_to_std_vector()
         dq.emplace_back(3);
         dq.emplace_back(4);
         dq.emplace_back(5);
-        auto v = cu::to_std_vector(std::move(dq));
-        static_assert(std::is_same_v<decltype(v), std::vector<cu::value_type<decltype(dq)>>>);
+        auto v = mleivo::cu::to_std_vector(std::move(dq));
+        static_assert(std::is_same_v<decltype(v), std::vector<mleivo::cu::value_type<decltype(dq)>>>);
         for (int i = 0; i < v.size(); i++)
         {
             COMPARE(i, v[i].m_val);
@@ -352,7 +352,7 @@ void test_to_std_vector()
 
 void test_compile_time_map()
 {
-    using my_type_map = cu::type_traits::type_map<int, char, double, float>;
+    using my_type_map = mleivo::type_traits::type_map<int, char, double, float>;
     static_assert(std::is_same_v<my_type_map::value<int>, char>);
 //    static_assert(std::is_same_v<my_type_map::value<bool>, char>);
 }
@@ -365,7 +365,7 @@ void test_transform()
         in.emplace_back(1);
         in.emplace_back(2);
         in.emplace_back(3);
-        auto out = cu::transform(std::move(in), [](move_only_type&& i) {
+        auto out = mleivo::cu::transform(std::move(in), [](move_only_type&& i) {
             return static_cast<double>(*i.m_val) * static_cast<double>(*i.m_val);
         });
         for (int i = 0; i < 4; i++)
@@ -379,7 +379,7 @@ void test_transform()
         in.emplace_back(1);
         in.emplace_back(2);
         in.emplace_back(3);
-        auto out = cu::transform(std::move(in), [](int i) {
+        auto out = mleivo::cu::transform(std::move(in), [](int i) {
             return move_only_type(i);
         });
         for (int i = 0; i < 4; i++)
@@ -393,7 +393,7 @@ void test_transform()
         in.emplace_back(1);
         in.emplace_back(2);
         in.emplace_back(3);
-        auto out = cu::transform(std::move(in), [](int i) {
+        auto out = mleivo::cu::transform(std::move(in), [](int i) {
             return copy_only_type(i);
         });
         for (int i = 0; i < 4; i++)
@@ -407,7 +407,7 @@ void test_transform()
         in.emplace_back(1);
         in.emplace_back(2);
         in.emplace_back(3);
-        auto out = cu::transform(std::move(in), [](const copy_only_type& i) {
+        auto out = mleivo::cu::transform(std::move(in), [](const copy_only_type& i) {
             return i.m_val;
         });
         for (int i = 0; i < 4; i++)

@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-namespace cu::type_traits
+namespace mleivo::type_traits
 {
 template<typename...>
 inline constexpr bool always_false_v = false;

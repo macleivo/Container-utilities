@@ -2,9 +2,12 @@
 
 #include "type_traits.h"
 
-namespace cu
+#include <algorithm>
+#include <vector>
+
+namespace mleivo::cu
 {
-using type_traits::value_type;
+using ::mleivo::type_traits::value_type;
 
 template<typename ContainerT>
 std::vector<value_type<ContainerT>> to_std_vector(ContainerT&& c);
@@ -13,11 +16,11 @@ std::vector<value_type<ContainerT>> to_std_vector(ContainerT&& c);
 template<typename ContainerT>
 bool contains(ContainerT&& c, const value_type<ContainerT>& value)
 {
-    if constexpr (type_traits::has_method_contains_v<ContainerT>)
+    if constexpr (mleivo::type_traits::has_method_contains_v<ContainerT>)
     {
         return c.contains(value);
     }
-    else if constexpr (type_traits::has_method_count_v<ContainerT>)
+    else if constexpr (mleivo::type_traits::has_method_count_v<ContainerT>)
     {
         return c.count(value) != 0;
     }
@@ -52,7 +55,7 @@ std::vector<value_type<ContainerT>> merge(ContainerT&& c)
 }
 
 template<typename ContainerT1, typename... ContainerT2ToN>
-std::enable_if_t<type_traits::value_types_equal_v<ContainerT1, ContainerT2ToN...>, std::vector<value_type<ContainerT1>>>
+std::enable_if_t<mleivo::type_traits::value_types_equal_v<ContainerT1, ContainerT2ToN...>, std::vector<value_type<ContainerT1>>>
 merge(ContainerT1&& c1, ContainerT2ToN&&... c2ToN)
 {
     auto out = merge(std::forward<ContainerT1>(c1));
