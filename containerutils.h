@@ -1,25 +1,29 @@
 #pragma once
 
-#include <type_traits>
+#include "type_traits.h"
 
 namespace cu
 {
-template<typename ContainerT1, typename... ContainerT2ToN>
-struct value_types_equal;
+using type_traits::value_type;
 
-template<typename ContainerT>
-struct value_types_equal<ContainerT> : std::true_type
+// filter
+template<typename ContainerT, typename Filter>
+std::vector<value_type<ContainerT>> filter(ContainerT&& c, Filter&& f)
 {
-};
+    std::vector<value_type<ContainerT>> v;
+    if constexpr (std::is_rvalue_reference_v<ContainerT> && std::is_move_assignable_v<value_type<ContainerT>>)
+    {
+        std::copy_if(std::make_move_iterator(std::begin(c)), std::make_move_iterator(std::end(c)),
+                     std::back_inserter(v), std::forward<Filter>(f));
+    }
+    else
+    {
+        std::copy_if(std::begin(c), std::end(c), std::back_inserter(v), std::forward<Filter>(f));
+    }
+    return v;
+}
 
-template<typename ContainerT1, typename ContainerT2, typename... ContainerT3ToN>
-struct value_types_equal<ContainerT1, ContainerT2, ContainerT3ToN...>
-    : std::bool_constant<std::is_same_v<typename std::decay_t<ContainerT1>::value_type,
-                                        typename std::decay_t<ContainerT2>::
-                                                value_type> && value_types_equal<ContainerT2, ContainerT3ToN...>::value>
-{
-};
-
+// merge
 template<typename ContainerT>
 std::vector<typename std::decay_t<ContainerT>::value_type> merge(ContainerT&& c)
 {
@@ -36,7 +40,7 @@ std::vector<typename std::decay_t<ContainerT>::value_type> merge(ContainerT&& c)
 }
 
 template<typename ContainerT1, typename... ContainerT2ToN>
-std::enable_if_t<value_types_equal<ContainerT1, ContainerT2ToN...>::value,
+std::enable_if_t<type_traits::value_types_equal<ContainerT1, ContainerT2ToN...>::value,
                  std::vector<typename std::decay_t<ContainerT1>::value_type>>
 merge(ContainerT1&& c1, ContainerT2ToN&&... c2ToN)
 {
@@ -47,4 +51,5 @@ merge(ContainerT1&& c1, ContainerT2ToN&&... c2ToN)
 
     return out;
 }
+
 }
