@@ -24,7 +24,7 @@
 #include <vector>
 
 namespace mleivo::pipes {
-namespace {
+namespace detail {
 template <typename CallT, typename... Args>
 struct wrapper {
     using mleivo_pipe = std::true_type;
@@ -65,7 +65,7 @@ struct ret_wrapper {
             std::move(m_t));
     }
 };
-} // namespace
+} // namespace detail
 
 #define MLEIVO_STL_WRAPPER(FUNCTION_NAME)                                                                              \
     namespace {                                                                                                        \
@@ -79,7 +79,7 @@ struct ret_wrapper {
                                                                                                                        \
     template <typename... Args>                                                                                        \
     constexpr decltype(auto) FUNCTION_NAME(Args&&... args) {                                                           \
-        return wrapper<struct FUNCTION_NAME, decltype(args)...>{std::forward<decltype(args)>(args)...};                \
+        return detail::wrapper<struct FUNCTION_NAME, decltype(args)...>{std::forward<decltype(args)>(args)...};        \
     };
 
 #define MLEIVO_STL_WRAPPER_RET(FUNCTION_NAME)                                                                          \
@@ -94,7 +94,7 @@ struct ret_wrapper {
                                                                                                                        \
     template <typename... Args>                                                                                        \
     constexpr auto FUNCTION_NAME(Args&&... args) {                                                                     \
-        return ret_wrapper<struct FUNCTION_NAME, decltype(args)...>(std::forward<decltype(args)>(args)...);            \
+        return detail::ret_wrapper<struct FUNCTION_NAME, decltype(args)...>(std::forward<decltype(args)>(args)...);    \
     }
 
 MLEIVO_STL_WRAPPER(for_each)
