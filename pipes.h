@@ -10,6 +10,8 @@ namespace mleivo::pipes {
 namespace {
 template <typename CallT, typename... Args>
 struct wrapper {
+    using mleivo_pipe = std::true_type;
+
     std::tuple<Args&&...> m_t;
     wrapper(Args&&... args) : m_t(std::forward<Args>(args)...) {
     }
@@ -50,7 +52,7 @@ MLEIVO_STL_WRAPPER(sort);
 } // namespace mleivo::pipes
 
 template <typename ContainerT, typename CallablePipeT,
-          typename = decltype(std::declval<CallablePipeT>()(std::declval<ContainerT>()))>
+          typename = typename std::remove_cv_t<std::remove_reference_t<CallablePipeT>>::mleivo_pipe>
 inline decltype(auto) constexpr operator|(ContainerT&& container, CallablePipeT&& f) {
     return f(std::forward<ContainerT>(container));
 }
