@@ -65,10 +65,11 @@ struct iter {
     iter_value_type<It, SizeT> m_value;
 };
 
-template <typename ContainerT, typename It>
+template <typename ContainerT, typename It, typename SizeT>
 struct enumerate_struct
     : std::conditional_t<std::is_rvalue_reference_v<ContainerT>, std::remove_reference_t<ContainerT>, empty_struct> {
-    enumerate_struct(It begin, It end, size_t size) : m_begin(std::move(begin)), m_end(std::move(end)), m_size(size) {
+    static_assert(std::is_integral_v<SizeT>);
+    enumerate_struct(It begin, It end, SizeT size) : m_begin(std::move(begin)), m_end(std::move(end)), m_size(size) {
     }
 
     template <typename X = ContainerT, typename = std::enable_if_t<std::is_rvalue_reference_v<X>>>
@@ -80,15 +81,15 @@ struct enumerate_struct
     }
 
     auto begin() {
-        return iter<decltype(m_begin), decltype(m_size)>{size_t{0}, m_begin};
+        return iter<decltype(m_begin), decltype(m_size)>{0, m_begin};
     }
     auto end() {
-        return iter<decltype(m_end), decltype(m_size)>{size_t{m_size}, m_end};
+        return iter<decltype(m_end), decltype(m_size)>{m_size, m_end};
     }
 
     It m_begin;
     It m_end;
-    size_t m_size;
+    SizeT m_size;
 };
 
 template <int Index, typename It, typename SizeT>
@@ -163,10 +164,11 @@ auto enumerate(ContainerT&& v) {
     using std::end;
     using std::size;
     using IterType = std::remove_reference_t<std::remove_cv_t<decltype(begin(v))>>;
+    using SizeType = decltype(size(std::declval<std::remove_cv_t<std::remove_reference_t<ContainerT>>>()));
     if constexpr (std::is_rvalue_reference_v<decltype(v)>) {
-        return detail::enumerate_struct<ContainerT&&, IterType>(std::move(v));
+        return detail::enumerate_struct<ContainerT&&, IterType, SizeType>(std::move(v));
     } else {
-        return detail::enumerate_struct<decltype(v), IterType>{begin(v), end(v), size(v)};
+        return detail::enumerate_struct<decltype(v), IterType, SizeType>{begin(v), end(v), size(v)};
     }
 }
 
