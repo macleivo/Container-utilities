@@ -23,6 +23,55 @@ namespace mleivo::type_traits
 template<typename...>
 inline constexpr bool always_false_v = false;
 
+// value_type_t
+template<typename ContainerT>
+using value_type = typename std::decay_t<ContainerT>::value_type;
+
+#define RETURN_TYPE(METHOD_NAME, ARGS...) decltype(std::declval<std::decay_t<ContainerT>>().METHOD_NAME(ARGS))
+#define CONTAINER_UTILS_HAS_METHOD(METHOD_NAME, WANTED_RETURN_TYPE, ARGS...) \
+    template<typename ContainerT, typename = void> \
+    struct has_method_ ## METHOD_NAME : std::false_type \
+    { \
+    }; \
+\
+    template<typename ContainerT> \
+    struct has_method_ ## METHOD_NAME<ContainerT, std::void_t<RETURN_TYPE(METHOD_NAME, ARGS)>> \
+        : std::bool_constant<std::is_same_v<WANTED_RETURN_TYPE, RETURN_TYPE(METHOD_NAME, ARGS)>> \
+    { \
+    }; \
+\
+    template<typename ContainerT> \
+    inline constexpr bool has_method_ ## METHOD_NAME ## _v = has_method_ ## METHOD_NAME<ContainerT>::value;
+
+CONTAINER_UTILS_HAS_METHOD(contains, bool, std::declval<value_type<ContainerT>>())
+CONTAINER_UTILS_HAS_METHOD(count, size_t, std::declval<value_type<ContainerT>>())
+CONTAINER_UTILS_HAS_METHOD(push_back, void, std::declval<value_type<ContainerT>>())
+#undef RETURN_TYPE
+#undef CONTAINER_UTILS_HAS_METHOD
+
+// is_predicate
+template<typename Pred, typename... Args>
+struct is_predicate
+{
+private:
+    template<typename Pred_, typename... Args_>
+    static inline constexpr
+    std::enable_if_t<std::is_same_v<bool, decltype(std::declval<Pred_>()(std::declval<Args_>()...))>, std::true_type>
+    can_call(int);
+
+    template<typename...>
+    static inline constexpr
+    std::false_type can_call(...);
+
+public:
+    using type = decltype(can_call<Pred, Args...>(0));
+    static inline constexpr auto value = type::value;
+};
+
+template<typename Pred, typename Arg>
+inline constexpr bool is_unary_predicate_v = is_predicate<Pred, Arg>::value;
+
+// type_map
 template<typename Key1, typename Value1, typename... KeyValues>
 struct type_map
 {
@@ -41,62 +90,6 @@ struct type_map<Key1, Value1>
                                    Value1,
                                    std::enable_if<always_false_v<Key>>>;
 };
-
-// value_type_t
-template<typename ContainerT>
-using value_type = typename std::decay_t<ContainerT>::value_type;
-
-#define GLUE_HELPER(x, y) x##y
-#define GLUE(x, y) GLUE_HELPER(x, y)
-#define RETURN_TYPE(METHOD_NAME, ARGS...) decltype(std::declval<std::decay_t<ContainerT>>().METHOD_NAME(ARGS))
-
-#define CONTAINER_UTILS_HAS_METHOD(METHOD_NAME, WANTED_RETURN_TYPE, ARGS...) \
-    template<typename ContainerT, typename = void> \
-    struct GLUE(has_method_, METHOD_NAME) : std::false_type \
-    { \
-    }; \
-\
-    template<typename ContainerT> \
-    struct GLUE(has_method_, METHOD_NAME)<ContainerT, std::void_t<RETURN_TYPE(METHOD_NAME, ARGS)>> \
-        : std::bool_constant<std::is_same_v<WANTED_RETURN_TYPE, RETURN_TYPE(METHOD_NAME, ARGS)>> \
-    { \
-    }; \
-\
-    template<typename ContainerT> \
-    inline constexpr bool GLUE(GLUE(has_method_, METHOD_NAME), _v) = GLUE(has_method_, METHOD_NAME)<ContainerT>::value;
-
-CONTAINER_UTILS_HAS_METHOD(contains, bool, std::declval<value_type<ContainerT>>())
-CONTAINER_UTILS_HAS_METHOD(count, size_t, std::declval<value_type<ContainerT>>())
-CONTAINER_UTILS_HAS_METHOD(push_back, void, std::declval<value_type<ContainerT>>())
-
-#undef GLUE_HELPER
-#undef GLUE
-#undef RETURN_TYPE
-#undef CONTAINER_UTILS_HAS_METHOD
-
-template<typename Pred, typename... Args>
-inline constexpr std::enable_if<
-    std::is_same_v<bool, decltype(std::declval<Pred>()(std::declval<Args>()...))>,
-  bool>
-helper()
-{
-    return true;
-}
-
-template<typename Pred, typename... Args>
-inline constexpr
-std::enable_if_t<std::is_same_v<bool, decltype(std::declval<Pred>()(std::declval<Args>()...))>, std::true_type>
-helper(int);
-
-template<typename...>
-inline constexpr
-std::false_type helper(...);
-
-template<typename Pred, typename... Args>
-struct is_predicate : decltype(helper<Pred, Args...>(0)) {};
-
-template<typename Pred, typename Arg>
-inline constexpr bool is_unary_predicate_v = is_predicate<Pred, Arg>::value;
 
 // value_types_are_equal
 template<typename ContainerT1, typename... ContainerT2ToN>
