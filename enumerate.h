@@ -29,16 +29,16 @@ struct Bindable {
 };
 
 struct Cont {
+    struct asd {
+        size_t m_i;
+        int* m_ptr;
+    };
     struct Iterator {
         using iterator_category = std::forward_iterator_tag;
         using difference_type = std::ptrdiff_t;
         using value_type = int;
         using pointer = value_type*;
         using reference = value_type&;
-        struct asd {
-            size_t m_i;
-            int* m_ptr;
-        };
         Iterator(size_t i, pointer ptr) : m_data({i, ptr}) {}
 
         asd& operator*() { return m_data; }
@@ -60,3 +60,19 @@ struct Cont {
   private:
     int m_array[5] = {1, 1, 1, 1, 1};
 };
+
+template<size_t index>
+std::tuple_element_t<index, Cont::asd>& get(Cont::asd& asd)
+{
+    if constexpr(index == 0) return asd.m_i;
+    if constexpr(index == 1) return *asd.m_ptr;
+}
+
+namespace std
+{
+template<>
+struct tuple_size<::Cont::asd> { static inline constexpr size_t value = 2; };
+
+template<> struct tuple_element<0, ::Cont::asd> { using type = size_t; };
+template<> struct tuple_element<1, ::Cont::asd> { using type = int&; };
+}

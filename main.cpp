@@ -114,8 +114,6 @@ void test_contains()
     }
 }
 
-template<class T>
-class TD;
 void test_merge()
 {
     {
@@ -437,15 +435,14 @@ void test_transform()
 void test_cont()
 {
     Cont asd;
-    for (auto it = asd.begin(), end = asd.end(); it != end; it++)
+    for (auto& [index, ptr] : asd)
     {
-        auto [index, ptr] = *it;
-        std::cout << index << " " << *ptr << std::endl;
+        ptr = index * 2;
     }
 
-    for (auto [index, ptr] : asd)
+    for (auto& [index, ptr] : asd)
     {
-        std::cout << index << " " << *ptr << std::endl;
+        std::cout << index << " " << ptr << std::endl;
     }
 }
 
