@@ -89,6 +89,26 @@ void testMerge()
             COMPARE(i, merged[i].m_val);
         }
     }
+
+    {
+        std::vector<copy_only_type> v1;
+        std::vector<copy_only_type> v2;
+        std::deque<copy_only_type> v3;
+
+        v1.emplace_back(0);
+        v1.emplace_back(1);
+        v2.emplace_back(2);
+        v2.emplace_back(3);
+        v3.emplace_back(4);
+        v3.emplace_back(5);
+
+        const auto merged = cu::merge(std::move(v1), std::move(v2), std::move(v3));
+        COMPARE(merged.size(), 6);
+        for (int i = 0; i < merged.size(); i++)
+        {
+            COMPARE(i, merged[i].m_val);
+        }
+    }
 }
 
 void testFilter()
