@@ -6,8 +6,6 @@
 #include "containerutils.h"
 #include "helpers.h"
 
-template <typename...>
-class TD;
 TEST_CASE("test_Enumerate()", "container utils") {
     {
         struct CharContainer : private std::vector<char> {
