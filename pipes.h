@@ -17,6 +17,7 @@
 #pragma once
 
 #include <algorithm>
+#include <numeric>
 #include <utility>
 
 #include <tuple>
@@ -93,7 +94,7 @@ struct ret_wrapper {
                                                                                                                        \
     template <typename... Args>                                                                                        \
     inline constexpr auto FUNCTION_NAME(Args&&... args) {                                                              \
-        return ret_wrapper<struct FUNCTION_NAME, decltype(args)...>(std::forward<decltype(args)>...);                  \
+        return ret_wrapper<struct FUNCTION_NAME, decltype(args)...>(std::forward<decltype(args)>(args)...);            \
     }
 
 MLEIVO_STL_WRAPPER(for_each)
@@ -101,6 +102,7 @@ MLEIVO_STL_WRAPPER(reverse)
 MLEIVO_STL_WRAPPER(sort)
 
 MLEIVO_STL_WRAPPER_RET(max_element)
+MLEIVO_STL_WRAPPER_RET(accumulate)
 
 #undef MLEIVO_STL_WRAPPER
 #undef MLEIVO_STL_WRAPPER_RET

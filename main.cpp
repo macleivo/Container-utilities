@@ -722,6 +722,12 @@ void test_pipe_max_element() {
     COMPARE(*v, 3);
 }
 
+void test_pipe_accumulate() {
+    auto v = std::vector<int>{0, 1, 2, 3};
+    auto ans = v | mleivo::pipes::accumulate(0, std::plus<int>{});
+    COMPARE(ans, 6);
+}
+
 int main() {
     test_merge();
     test_filter();
@@ -744,5 +750,6 @@ int main() {
     test_pipe_for_each_verbose();
     test_pipe_sort();
     test_pipe_max_element();
+    test_pipe_accumulate();
     return g_ret_val;
 }
