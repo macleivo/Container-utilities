@@ -8,11 +8,18 @@ namespace cu::type_traits
 template<typename ContainerT>
 using value_type = typename std::decay_t<ContainerT>::value_type;
 
+#define GLUE_HELPER(x, y) x##y
+#define GLUE(x, y) GLUE_HELPER(x, y)
+
+#define CONTAINER_UTILS_HAS_METHOD(NAME, RETURN_TYPE, ARG)                                                             \
+    template<typename ContainerT, typename = void>                                                                     \
+    struct GLUE(has_method_, NAME) : std::false_type                                                                   \
+    {                                                                                                                  \
+    };
+
+CONTAINER_UTILS_HAS_METHOD(contains, bool, std::declval<value_type<ContainerT>>())
+
 // has_method_contains
-template<typename ContainerT, typename = void>
-struct has_method_contains : std::false_type
-{
-};
 
 template<typename ContainerT>
 struct has_method_contains<ContainerT,
