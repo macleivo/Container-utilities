@@ -6,12 +6,7 @@
 #include <tuple>
 #include <vector>
 
-template <typename ContainerT, typename CallablePipeT,
-          typename = decltype(std::declval<CallablePipeT>()(std::declval<ContainerT>()))>
-inline decltype(auto) constexpr operator|(ContainerT&& container, CallablePipeT&& f);
-
 namespace mleivo::pipes {
-
 namespace {
 template <typename CallT, typename... Args>
 struct wrapper {
@@ -52,10 +47,10 @@ MLEIVO_STL_WRAPPER(for_each);
 MLEIVO_STL_WRAPPER(reverse);
 MLEIVO_STL_WRAPPER(sort);
 #undef MLEIVO_STL_WRAPPER
-
 } // namespace mleivo::pipes
 
-template <typename ContainerT, typename CallablePipeT, typename>
+template <typename ContainerT, typename CallablePipeT,
+          typename = decltype(std::declval<CallablePipeT>()(std::declval<ContainerT>()))>
 inline decltype(auto) constexpr operator|(ContainerT&& container, CallablePipeT&& f) {
     return f(std::forward<ContainerT>(container));
 }
