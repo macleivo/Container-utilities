@@ -440,7 +440,8 @@ void test_cont()
         ptr = index * 2;
     }
 
-    for (auto& [index, ptr] : asd)
+    const Cont foo = asd;
+    for (auto& [index, ptr] : foo)
     {
         std::cout << index << " " << ptr << std::endl;
     }
