@@ -729,17 +729,18 @@ void test_pipe_accumulate() {
     auto ans = v | mleivo::pipes::accumulate(0, std::plus<int>{});
     COMPARE(ans, 6);
 }
-
+#include <experimental/propagate_const>
 void test_pc() {
     struct S {
         void f(){};
         void g() const {};
     };
-    mleivo::pc<S*> i = new S;
+    mleivo::propagate_const<S*> i(new S);
+    std::experimental::propagate_const<int*> x;
     auto& j = *i;
     j.f();
     j.g();
-    decltype(auto) x = i.get();
+    delete i.get();
 }
 
 int main() {
