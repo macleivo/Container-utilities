@@ -66,7 +66,7 @@ using value_type = typename std::decay_t<ContainerT>::value_type;
     inline constexpr bool GLUE(GLUE(has_method_, METHOD_NAME), _v) = GLUE(has_method_, METHOD_NAME)<ContainerT>::value;
 
 CONTAINER_UTILS_HAS_METHOD(contains, bool, std::declval<value_type<ContainerT>>())
-CONTAINER_UTILS_HAS_METHOD(count, git@github.com:macleivo/cpp-utilities.gitsize_t, std::declval<value_type<ContainerT>>())
+CONTAINER_UTILS_HAS_METHOD(count, size_t, std::declval<value_type<ContainerT>>())
 
 #undef GLUE_HELPER
 #undef GLUE
