@@ -17,6 +17,7 @@
 #include <bits/stdc++.h>
 
 #include "containerutils.h"
+#include "enumerate.h"
 
 auto g_ret_val = int { 0 };
 
@@ -433,6 +434,21 @@ void test_transform()
     }
 }
 
+void test_cont()
+{
+    Cont asd;
+    for (auto it = asd.begin(), end = asd.end(); it != end; it++)
+    {
+        auto [index, ptr] = *it;
+        std::cout << index << " " << *ptr << std::endl;
+    }
+
+    for (auto [index, ptr] : asd)
+    {
+        std::cout << index << " " << *ptr << std::endl;
+    }
+}
+
 int main()
 {
     test_merge();
@@ -442,5 +458,6 @@ int main()
     test_contains();
     test_transform();
     test_compile_time_map();
+    test_cont();
     return g_ret_val;
 }
