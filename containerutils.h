@@ -208,11 +208,14 @@ void pop_front(ContainerT& v)
 
 // remove_all
 template<typename ContainerT, typename T>
-void remove_all(ContainerT& container, T&& itemToFind)
+void remove_all(ContainerT& container, T&& predOrItem)
 {
     using std::begin;
     using std::end;
-    container.erase(std::remove(begin(container), end(container), std::forward<T>(itemToFind)), end(container));
+    if constexpr(mleivo::type_traits::is_unary_predicate_v<decltype(predOrItem), value_type<ContainerT>>)
+        container.erase(std::remove_if(begin(container), end(container), std::forward<T>(predOrItem)), end(container));
+    else
+        container.erase(std::remove(begin(container), end(container), std::forward<T>(predOrItem)), end(container));
 }
 
 // remove_duplicates

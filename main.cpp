@@ -512,6 +512,11 @@ void test_remove_all()
         mleivo::cu::remove_all(v, 2);
         COMPARE(0, v.size());
     }
+    {
+        std::vector<int> v{0,1,2,3,4,5};
+        mleivo::cu::remove_all(v, [](int i) { return i % 2 == 0;});
+        COMPARE(true, cmp(std::vector<int>{1,3,5}, v));
+    }
 }
 
 void test_move_to_index()

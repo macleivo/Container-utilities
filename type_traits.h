@@ -74,6 +74,19 @@ CONTAINER_UTILS_HAS_METHOD(push_back, void, std::declval<value_type<ContainerT>>
 #undef RETURN_TYPE
 #undef CONTAINER_UTILS_HAS_METHOD
 
+
+template<typename Pred, typename Arg, typename = void>
+struct is_unary_predicate : std::false_type{};
+
+template<typename Pred, typename Arg>
+struct is_unary_predicate<Pred, Arg, std::void_t<decltype(std::declval<Pred>()(std::declval<Arg>()))>> :
+std::bool_constant<std::is_same_v<bool, decltype(std::declval<Pred>()(std::declval<Arg>()))>>
+{
+};
+
+template<typename Pred, typename Arg>
+inline constexpr bool is_unary_predicate_v = is_unary_predicate<Pred, Arg>::value;
+
 // value_types_are_equal
 template<typename ContainerT1, typename... ContainerT2ToN>
 struct value_types_equal;
