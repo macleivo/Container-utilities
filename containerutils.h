@@ -39,17 +39,15 @@ auto static_cast_all_default_imp(const From& from) {
     return out;
 }
 
-template <typename It>
+template <typename It, typename SizeT>
 struct iter_value_type {
-    size_t m_index;
+    static_assert(std::is_integral_v<SizeT>);
+    SizeT m_index;
     It m_iter;
 };
 
-template <typename It>
+template <typename It, typename SizeT>
 struct iter {
-    iter(size_t i, It it) : m_value{i, std::move(it)} {
-    }
-
     auto& operator++() {
         ++m_value.m_index;
         ++m_value.m_iter;
@@ -64,7 +62,7 @@ struct iter {
         return m_value.m_iter != rhs.m_value.m_iter || m_value.m_index != rhs.m_value.m_index;
     }
 
-    iter_value_type<It> m_value;
+    iter_value_type<It, SizeT> m_value;
 };
 
 template <typename ContainerT, typename It>
@@ -82,10 +80,10 @@ struct enumerate_struct
     }
 
     auto begin() {
-        return iter<decltype(m_begin)>{size_t{0}, m_begin};
+        return iter<decltype(m_begin), decltype(m_size)>{size_t{0}, m_begin};
     }
     auto end() {
-        return iter<decltype(m_end)>{size_t{m_size}, m_end};
+        return iter<decltype(m_end), decltype(m_size)>{size_t{m_size}, m_end};
     }
 
     It m_begin;
@@ -93,24 +91,24 @@ struct enumerate_struct
     size_t m_size;
 };
 
-template <int Index, typename It>
-auto get(iter_value_type<It>&& it) {
+template <int Index, typename It, typename SizeT>
+auto get(iter_value_type<It, SizeT>&& it) {
     if constexpr (Index == 0)
         return it.m_index;
     else if constexpr (Index == 1)
         return *it.m_iter;
 }
 
-template <int Index, typename It>
-auto& get(iter_value_type<It>& it) {
+template <int Index, typename It, typename SizeT>
+auto& get(iter_value_type<It, SizeT>& it) {
     if constexpr (Index == 0)
         return it.m_index;
     else if constexpr (Index == 1)
         return *it.m_iter;
 }
 
-template <int Index, typename It>
-const auto& get(const iter_value_type<It>& it) {
+template <int Index, typename It, typename SizeT>
+const auto& get(const iter_value_type<It, SizeT>& it) {
     if constexpr (Index == 0)
         return it.m_index;
     else if constexpr (Index == 1)
@@ -144,11 +142,11 @@ struct Enumerate
 {
     auto begin() {
         auto it = detail::begin_(m_container);
-        return detail::iter<decltype(it)>{size_t{0}, it};
+        return detail::iter<decltype(it), decltype(m_size)>{0, it};
     }
     auto end() {
         auto it = detail::end_(m_container);
-        return detail::iter<decltype(it)>{size_t{m_size}, it};
+        return detail::iter<decltype(it), decltype(m_size)>{m_size, it};
     }
 
     using T = std::conditional_t<std::is_rvalue_reference_v<ContainerT>, std::remove_cv_t<std::remove_reference_t<ContainerT>>, ContainerT>;
@@ -442,16 +440,16 @@ std::vector<value_type<ContainerT>> to_std_vector(ContainerT&& c) {
 } // namespace mleivo::cu
 
 namespace std {
-template <typename It>
-struct tuple_size<mleivo::cu::detail::iter_value_type<It>> : std::integral_constant<size_t, 2> {};
+template <typename It, typename SizeT>
+struct tuple_size<mleivo::cu::detail::iter_value_type<It, SizeT>> : std::integral_constant<size_t, 2> {};
 
-template <typename It>
-struct tuple_element<0, mleivo::cu::detail::iter_value_type<It>> {
+template <typename It, typename SizeT>
+struct tuple_element<0, mleivo::cu::detail::iter_value_type<It, SizeT>> {
     using type = size_t;
 };
 
-template <typename It>
-struct tuple_element<1, mleivo::cu::detail::iter_value_type<It>> {
+template <typename It, typename SizeT>
+struct tuple_element<1, mleivo::cu::detail::iter_value_type<It, SizeT>> {
     using type = std::remove_reference_t<decltype(*std::declval<It>())>;
 };
 } // namespace std
