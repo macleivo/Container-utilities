@@ -8,6 +8,39 @@ namespace cu::type_traits
 template<typename ContainerT>
 using value_type = typename std::decay_t<ContainerT>::value_type;
 
+// has_method_contains
+template<typename ContainerT, typename = void>
+struct has_method_contains : std::false_type
+{
+};
+
+template<typename ContainerT>
+struct has_method_contains<ContainerT,
+                           std::void_t<decltype(std::declval<std::decay_t<ContainerT>>().contains(
+                                   std::declval<value_type<ContainerT>>()))>> : std::true_type
+{
+};
+
+template<typename ContainerT>
+inline constexpr bool has_method_contains_v = has_method_contains<ContainerT>::value;
+
+// has_method_count
+template<typename ContainerT, typename = void>
+struct has_method_count : std::false_type
+{
+};
+
+template<typename ContainerT>
+struct has_method_count<
+        ContainerT,
+        std::void_t<decltype(std::declval<std::decay_t<ContainerT>>().count(std::declval<value_type<ContainerT>>()))>>
+    : std::true_type
+{
+};
+
+template<typename ContainerT>
+inline constexpr bool has_method_count_v = has_method_count<ContainerT>::value;
+
 // value_types_are_equal
 template<typename ContainerT1, typename... ContainerT2ToN>
 struct value_types_equal;
