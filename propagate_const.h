@@ -51,7 +51,12 @@ class propagate_const {
 
 public:
     constexpr propagate_const() = default;
+
+    propagate_const(const propagate_const&) = delete;
+    propagate_const& operator=(const propagate_const&) = delete;
+
     constexpr propagate_const(propagate_const&& p) = default;
+    constexpr propagate_const& operator=(propagate_const&& p) = default;
 
     template <typename U, typename std::enable_if_t<
                               std::is_constructible_v<T, U> and not std::is_convertible<U, T>::value, int> = 0>
@@ -75,7 +80,17 @@ public:
     constexpr propagate_const(U&& u) : m_ptr(std::forward<U>(u)) {
     }
 
-    propagate_const(const propagate_const&) = delete;
+    template<typename U,typename std::enable_if_t<std::is_convertible_v<U, T>, int> = 0>
+    constexpr propagate_const& operator=(propagate_const<U>&& pu) { m_ptr = std::move(pu.m_ptr); }
+
+    template <typename U, typename std::enable_if_t<
+                              std::is_convertible_v<U, T> and not is_propagate_const_v<std::decay_t<U>>, int> = 1>
+    constexpr propagate_const& operator=(U&& u) { m_ptr = std::forward<U>(u); }
+
+    constexpr void swap(propagate_const& pt) noexcept(std::is_nothrow_swappable_v<T>) {
+        using std::swap;
+        swap(m_ptr, pt.m_ptr);
+    }
 
     constexpr element_type* get() {
         return m_ptr;
