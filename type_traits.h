@@ -10,17 +10,17 @@ using value_type = typename std::decay_t<ContainerT>::value_type;
 
 #define GLUE_HELPER(x, y) x##y
 #define GLUE(x, y) GLUE_HELPER(x, y)
-#define RETURN_TYPE(METHOD_NAME, ARG) decltype(std::declval<std::decay_t<ContainerT>>().METHOD_NAME(ARG))
+#define RETURN_TYPE(METHOD_NAME, ARGS...) decltype(std::declval<std::decay_t<ContainerT>>().METHOD_NAME(ARGS))
 
-#define CONTAINER_UTILS_HAS_METHOD(METHOD_NAME, WANTED_RETURN_TYPE, ARG) \
+#define CONTAINER_UTILS_HAS_METHOD(METHOD_NAME, WANTED_RETURN_TYPE, ARGS...) \
     template<typename ContainerT, typename = void> \
     struct GLUE(has_method_, METHOD_NAME) : std::false_type \
     { \
     }; \
 \
     template<typename ContainerT> \
-    struct GLUE(has_method_, METHOD_NAME)<ContainerT, std::void_t<RETURN_TYPE(METHOD_NAME, ARG)>> \
-        : std::bool_constant<std::is_same_v<WANTED_RETURN_TYPE, RETURN_TYPE(METHOD_NAME, ARG)>> \
+    struct GLUE(has_method_, METHOD_NAME)<ContainerT, std::void_t<RETURN_TYPE(METHOD_NAME, ARGS)>> \
+        : std::bool_constant<std::is_same_v<WANTED_RETURN_TYPE, RETURN_TYPE(METHOD_NAME, ARGS)>> \
     { \
     }; \
 \
