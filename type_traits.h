@@ -15,42 +15,21 @@ using value_type = typename std::decay_t<ContainerT>::value_type;
     template<typename ContainerT, typename = void>                                                                     \
     struct GLUE(has_method_, NAME) : std::false_type                                                                   \
     {                                                                                                                  \
-    };
+    };                                                                                                                 \
+                                                                                                                       \
+    template<typename ContainerT>                                                                                      \
+    struct GLUE(has_method_,                                                                                           \
+                NAME)<ContainerT, std::void_t<decltype(std::declval<std::decay_t<ContainerT>>().NAME(ARG))>>           \
+        : std::bool_constant<std::is_same_v<bool, decltype(std::declval<std::decay_t<ContainerT>>().NAME(ARG))>>       \
+    {                                                                                                                  \
+    };                                                                                                                 \
+                                                                                                                       \
+    template<typename ContainerT>                                                                                      \
+    inline constexpr bool GLUE(GLUE(has_method_, NAME), _v) = GLUE(has_method_, NAME)<ContainerT>::value;
 
 CONTAINER_UTILS_HAS_METHOD(contains, bool, std::declval<value_type<ContainerT>>())
 
-// has_method_contains
-
-template<typename ContainerT>
-struct has_method_contains<ContainerT,
-                           std::void_t<decltype(std::declval<std::decay_t<ContainerT>>().contains(
-                                   std::declval<value_type<ContainerT>>()))>>
-    : std::bool_constant<std::is_same_v<bool,
-                                        decltype(std::declval<std::decay_t<ContainerT>>().contains(
-                                                std::declval<value_type<ContainerT>>()))>>
-{
-};
-
-template<typename ContainerT>
-inline constexpr bool has_method_contains_v = has_method_contains<ContainerT>::value;
-
-// has_method_count
-template<typename ContainerT, typename = void>
-struct has_method_count : std::false_type
-{
-};
-
-template<typename ContainerT>
-struct has_method_count<
-        ContainerT,
-        std::void_t<decltype(std::declval<std::decay_t<ContainerT>>().count(std::declval<value_type<ContainerT>>()))>>
-    : std::bool_constant<std::is_integral_v<decltype(std::declval<std::decay_t<ContainerT>>().count(
-              std::declval<value_type<ContainerT>>()))>>
-{
-};
-
-template<typename ContainerT>
-inline constexpr bool has_method_count_v = has_method_count<ContainerT>::value;
+CONTAINER_UTILS_HAS_METHOD(count, std::size_t, std::declval<value_type<ContainerT>>())
 
 // value_types_are_equal
 template<typename ContainerT1, typename... ContainerT2ToN>
