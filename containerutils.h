@@ -25,10 +25,10 @@ std::vector<value_type<ContainerT>> filter(ContainerT&& c, Filter&& f)
 
 // merge
 template<typename ContainerT>
-std::vector<typename std::decay_t<ContainerT>::value_type> merge(ContainerT&& c)
+std::vector<value_type<ContainerT>> merge(ContainerT&& c)
 {
-    std::vector<typename std::decay_t<ContainerT>::value_type> out;
-    if constexpr (std::is_rvalue_reference_v<ContainerT>)
+    std::vector<value_type<ContainerT>> out;
+    if constexpr (std::is_rvalue_reference_v<decltype(c)>)
     {
         out.insert(out.end(), std::make_move_iterator(std::begin(c)), std::make_move_iterator(std::end(c)));
     }
@@ -40,8 +40,7 @@ std::vector<typename std::decay_t<ContainerT>::value_type> merge(ContainerT&& c)
 }
 
 template<typename ContainerT1, typename... ContainerT2ToN>
-std::enable_if_t<type_traits::value_types_equal<ContainerT1, ContainerT2ToN...>::value,
-                 std::vector<typename std::decay_t<ContainerT1>::value_type>>
+std::enable_if_t<type_traits::value_types_equal_v<ContainerT1, ContainerT2ToN...>, std::vector<value_type<ContainerT1>>>
 merge(ContainerT1&& c1, ContainerT2ToN&&... c2ToN)
 {
     auto out = merge(std::forward<ContainerT1>(c1));

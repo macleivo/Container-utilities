@@ -24,4 +24,7 @@ struct value_types_equal<ContainerT1, ContainerT2, ContainerT3ToN...>
                                                 value_type> && value_types_equal<ContainerT2, ContainerT3ToN...>::value>
 {
 };
+
+template<typename ContainerT1, typename... ContainerT2ToN>
+inline constexpr bool value_types_equal_v = value_types_equal<ContainerT1, ContainerT2ToN...>::value;
 }
