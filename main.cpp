@@ -95,6 +95,22 @@ struct copy_only_type
     }
 };
 
+struct Base
+{
+    int operator()() const
+    {
+        return 0xB;
+    }
+};
+
+struct Derived : public Base
+{
+    int operator()() const
+    {
+        return 0xD;
+    }
+};
+
 void test_contains()
 {
     struct wrapper : public std::vector<int>
@@ -589,6 +605,24 @@ void test_static_cast_all()
         for (int i = 0; i < ints.size(); ++i)
         {
             COMPARE(i, ints[i]);
+        }
+    }
+
+    {
+        auto as_base = std::vector<Base*> {};
+        as_base.emplace_back(new Derived);
+        as_base.emplace_back(new Derived);
+        as_base.emplace_back(new Derived);
+
+        for (const auto* b : as_base)
+        {
+            COMPARE((*b)(), 0xB);
+        }
+
+        auto as_der = mleivo::cu::static_cast_all<Derived*>(as_base);
+        for (const auto* d : as_der)
+        {
+            COMPARE((*d)(), 0xD);
         }
     }
 }

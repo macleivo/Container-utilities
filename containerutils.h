@@ -29,11 +29,14 @@ using ::mleivo::type_traits::value_type;
 namespace detail
 {
 template<typename To, typename From>
-auto copy_to(const From& from)
+auto static_cast_all_default_imp(const From& from)
 {
     using std::cbegin;
     using std::cend;
-    return To(cbegin(from), cend(from));
+    To out;
+    std::transform(cbegin(from), cend(from), std::back_inserter(out),
+                   [](auto& e) { return static_cast<value_type<To>>(e); });
+    return out;
 }
 }
 
@@ -62,7 +65,7 @@ bool any_of(const ContainerT& container, UnaryPredicate&& predicate)
 template<typename T, typename ValueT, template<typename...> typename ContainerT, typename... ContainerTArgs>
 auto static_cast_all(const ContainerT<ValueT, ContainerTArgs...>& container)
 {
-    return detail::copy_to<ContainerT<T>>(container);
+    return detail::static_cast_all_default_imp<ContainerT<T>>(container);
 }
 
 template<typename OutT, typename InT, size_t N>
@@ -90,7 +93,7 @@ auto static_cast_all(const ContainerT<FromT, N>& container)
 template<typename T, typename ContainerT> // fall back to returning an std::vector
 auto static_cast_all(const ContainerT& container)
 {
-    return detail::copy_to<std::vector<T>>(container);
+    return detail::static_cast_all_default_imp<std::vector<T>>(container);
 }
 
 // contains
