@@ -17,7 +17,10 @@ struct has_method_contains : std::false_type
 template<typename ContainerT>
 struct has_method_contains<ContainerT,
                            std::void_t<decltype(std::declval<std::decay_t<ContainerT>>().contains(
-                                   std::declval<value_type<ContainerT>>()))>> : std::true_type
+                                   std::declval<value_type<ContainerT>>()))>>
+    : std::bool_constant<std::is_same_v<bool,
+                                        decltype(std::declval<std::decay_t<ContainerT>>().contains(
+                                                std::declval<value_type<ContainerT>>()))>>
 {
 };
 
@@ -34,7 +37,8 @@ template<typename ContainerT>
 struct has_method_count<
         ContainerT,
         std::void_t<decltype(std::declval<std::decay_t<ContainerT>>().count(std::declval<value_type<ContainerT>>()))>>
-    : std::true_type
+    : std::bool_constant<std::is_integral_v<decltype(std::declval<std::decay_t<ContainerT>>().count(
+              std::declval<value_type<ContainerT>>()))>>
 {
 };
 
