@@ -36,10 +36,18 @@ bool all_of(const ContainerT& container, UnaryPredicate&& predicate)
     using std::end;
     return std::all_of(begin(container), end(container), predicate);
 }
+// any_of
+template<typename ContainerT, typename UnaryPredicate>
+bool any_of(const ContainerT& container, UnaryPredicate&& predicate)
+{
+    using std::begin;
+    using std::end;
+    return std::any_of(begin(container), end(container), predicate);
+}
 
 // contains
-template<typename ContainerT>
-bool contains(ContainerT&& c, const value_type<ContainerT>& value)
+template<typename ContainerT, typename ValueT>
+bool contains(const ContainerT& c, const ValueT& value)
 {
     if constexpr (mleivo::type_traits::has_method_contains_v<ContainerT>)
     {

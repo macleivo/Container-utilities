@@ -86,9 +86,9 @@ void test_contains()
 {
     struct wrapper : public std::vector<int>
     {
-        bool contains(int i)
+        bool contains(int i) const
         {
-            return std::find(std::begin(*this), std::end(*this), i) != std::end(*this);
+            return std::find(std::cbegin(*this), std::cend(*this), i) != std::cend(*this);
         }
     };
 
@@ -111,6 +111,18 @@ void test_contains()
         auto v = std::vector<int> { 0, 1, 2, 3, 4 };
         COMPARE(true, mleivo::cu::contains(v, 0));
         COMPARE(false, mleivo::cu::contains(v, -1));
+    }
+
+    {
+        std::vector<std::unique_ptr<int>> v;
+        v.emplace_back(std::make_unique<int>(0));
+        v.emplace_back(std::make_unique<int>(1));
+        v.emplace_back(std::make_unique<int>(2));
+        v.emplace_back(std::make_unique<int>(3));
+
+        COMPARE(true, mleivo::cu::contains(v, v.front()));
+        COMPARE(false, mleivo::cu::contains(v, nullptr));
+        COMPARE(false, mleivo::cu::contains(v, std::make_unique<int>(0)));
     }
 }
 
@@ -458,6 +470,17 @@ void test_all_of()
     COMPARE(false, mleivo::cu::all_of(s, [](int i) { return i % 2; }));
 }
 
+void test_any_of()
+{
+    std::set<int> s{1, 3, 5};
+    COMPARE(true, mleivo::cu::any_of(s, [](int i) { return i % 2; }));
+
+    s.insert(2);
+    COMPARE(true, mleivo::cu::any_of(s, [](int i) { return i % 2; }));
+
+    COMPARE(false, mleivo::cu::any_of(s, [](int i) { return i > 5; }));
+}
+
 void test_remove_duplicates()
 {
     std::vector<int> v{ 0, 1, 0, 1, 2, 2, 2, 3, 2, 2};
@@ -480,6 +503,7 @@ int main()
     test_compile_time_map();
     test_cont();
     test_all_of();
+    test_any_of();
     test_remove_duplicates();
     return g_ret_val;
 }
