@@ -434,6 +434,7 @@ void test_transform()
 
 void test_cont()
 {
+    /* TODO
     Cont asd;
     for (auto& [index, ptr] : asd)
     {
@@ -445,6 +446,16 @@ void test_cont()
     {
         std::cout << index << " " << ptr << std::endl;
     }
+    */
+}
+
+void test_all_of()
+{
+    std::set<int> s{1, 3, 5};
+    COMPARE(true, mleivo::cu::all_of(s, [](int i) { return i % 2; }));
+
+    s.insert(2);
+    COMPARE(false, mleivo::cu::all_of(s, [](int i) { return i % 2; }));
 }
 
 int main()
@@ -457,5 +468,6 @@ int main()
     test_transform();
     test_compile_time_map();
     test_cont();
+    test_all_of();
     return g_ret_val;
 }

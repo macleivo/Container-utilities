@@ -28,6 +28,15 @@ using ::mleivo::type_traits::value_type;
 template<typename ContainerT>
 std::vector<value_type<ContainerT>> to_std_vector(ContainerT&& c);
 
+// all_of
+template<typename ContainerT, typename UnaryPredicate>
+bool all_of(const ContainerT& container, UnaryPredicate&& predicate)
+{
+    using std::begin;
+    using std::end;
+    return std::all_of(begin(container), end(container), predicate);
+}
+
 // contains
 template<typename ContainerT>
 bool contains(ContainerT&& c, const value_type<ContainerT>& value)
