@@ -4,6 +4,42 @@
 
 namespace cu::type_traits
 {
+template<typename...>
+inline constexpr bool always_false_v = false;
+
+template<typename Key,
+         typename Key1, typename Value1,
+         typename... KeyValues>
+struct out
+{
+    using type = std::conditional_t<std::is_same_v<Key, Key1>, Value1,
+                                    typename out<Key, KeyValues...>::type>;
+};
+
+template<typename Key, typename Key1, typename Value1>
+struct out<Key, Key1, Value1>
+{
+    using type = std::conditional_t<std::is_same_v<Key, Key1>, Value1,
+                                    void>;
+};
+
+template<typename... Ts>
+using out_t = typename out<Ts...>::type;
+
+template<typename... KeyValues>
+struct my_map
+{
+    template<typename Key>
+    using value = out_t<Key, KeyValues...>;
+};
+
+
+#define KeyValue(KEY, VALUE) std::conditional_t<std::is_same_v<Key, KEY>, VALUE
+#define ASD(ARGS...) ARGS, std::enable_if<always_false_v<Key>, void>>>
+
+template<typename Key>
+using value_t = ASD(KeyValue(int, char), KeyValue(double, float));
+
 // value_type_t
 template<typename ContainerT>
 using value_type = typename std::decay_t<ContainerT>::value_type;

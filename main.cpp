@@ -350,6 +350,25 @@ void test_to_std_vector()
     }
 }
 
+void test_compile_time_map()
+{
+    static_assert(std::is_same_v<cu::type_traits::value_t<int>, char>);
+    static_assert(std::is_same_v<cu::type_traits::value_t<double>, float>);
+
+    static_assert(
+      std::is_same_v<cu::type_traits::out_t<int, int, char, double, float>,
+                     char>);
+    static_assert(
+      std::is_same_v<cu::type_traits::out_t<double, int, char, double, float>,
+                     float>);
+
+    using mappi = cu::type_traits::my_map<int, char, double, float>;
+    static_assert(std::is_same_v<mappi::value<int>, char>);
+    static_assert(std::is_same_v<mappi::value<double>, float>);
+
+    //    static_assert(std::is_same_v<cu::type_traits::value_t<bool>, void>);
+}
+
 void test_transform()
 {
     {
@@ -418,5 +437,6 @@ int main()
     test_to_std_vector();
     test_contains();
     test_transform();
+    test_compile_time_map();
     return g_ret_val;
 }
