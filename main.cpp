@@ -354,6 +354,7 @@ void test_compile_time_map()
 {
     using my_type_map = cu::type_traits::type_map<int, char, double, float>;
     static_assert(std::is_same_v<my_type_map::value<int>, char>);
+//    static_assert(std::is_same_v<my_type_map::value<bool>, char>);
 }
 
 void test_transform()

@@ -21,7 +21,9 @@ template<typename Key1, typename Value1>
 struct type_map<Key1, Value1>
 {
   template<typename Key>
-  using value = std::conditional_t<std::is_same_v<Key, Key1>, Value1, void>;
+  using value = std::conditional_t<std::is_same_v<Key, Key1>,
+                                   Value1,
+                                   std::enable_if<always_false_v<Key>>>;
 };
 
 // value_type_t
